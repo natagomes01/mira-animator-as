@@ -1,0 +1,23 @@
+/* MIRA THEME: albatroz-deco (ESCURO, premium)
+   ALBATROZ STUDIO — Art Déco sóbrio. Carvão-verde ESMERALDA (base oficial dos
+   "session blocks" do brand) + BRONZE em fio metálico fino. Laranja da marca só
+   como faísca de acento (escasso). Ouro-velho como bevel.
+   Tokens espelham studio/brand/design-sys/README.md (§ Backgrounds & Shadows) e
+   colors_and_type.css. */
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Kameron:wght@400;500;600;700&family=Raleway:wght@300;400;500;600;700;800&display=swap');
+:root {
+    --mira-primary:       #A87E43;   /* BRONZE — metal dominante (fio fino) */
+    --mira-primary-deep:  #5C421A;   /* bronze profundo (brand session-block) */
+    --mira-accent-2:      #D9BC86;   /* ouro-velho — bevel/realce sutil */
+    --mira-accent-cta:    #F04500;   /* laranja da marca — faísca de acento, escasso */
+    --mira-emerald:       #1E4B3E;   /* esmeralda profundo — linha secundária */
+    --mira-crop:          #5F6870;   /* slate frio */
+    --mira-bg:            #0E1F1A;   /* carvão-verde esmeralda (brand #0F211E) */
+    --mira-bg-2:          #091310;   /* fundo profundo do gradiente */
+    --mira-text:          #F2EDE4;   /* off-white quente */
+    --mira-text-soft:     rgba(242, 237, 228, 0.72);
+    --mira-text-softer:   rgba(242, 237, 228, 0.46);
+    --mira-font-display:  'Anton', 'Helvetica Neue Condensed Bold', Impact, sans-serif;
+    --mira-font-highlight:'Kameron', Georgia, 'Times New Roman', serif;
+    --mira-font-body:     'Raleway', 'Helvetica Neue', Arial, sans-serif;
+}

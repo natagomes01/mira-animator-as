@@ -1,0 +1,29 @@
+/* MIRA THEME: albatroz-army
+   ALBATROZ STUDIO — oliva institucional. Fundo oliva-carvão + ARMY (#696858 e
+   tons) como cor viva/dominante; laranja da marca (#F04500) entra só como toque
+   de CTA/eyebrow. Cara mais sóbria, institucional.
+   Tokens espelham studio/brand/design-sys/colors_and_type.css. */
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Raleway:wght@300;400;500;600;700;800&display=swap');
+:root {
+    --mira-primary:       #9E9E82;   /* army-light — cor de marca dominante */
+    --mira-primary-deep:  #6B6A57;   /* army (#696858) — gradientes/barra */
+    --mira-accent-2:      #C9C6AC;   /* khaki claro — realce */
+    --mira-crop:          #5F6870;   /* slate — "matéria bruta / estático / frio" */
+    --mira-bg:            #14150F;   /* oliva-carvão profundo */
+    --mira-text:          #F2EDE4;   /* off-white quente da marca */
+    --mira-text-soft:     rgba(242, 237, 228, 0.72);
+    --mira-text-softer:   rgba(242, 237, 228, 0.48);
+    --mira-card-bg:       rgba(242, 237, 228, 0.05);
+    --mira-card-border:   rgba(242, 237, 228, 0.10);
+    --mira-glow-soft:     rgba(158, 158, 130, 0.16);
+    --mira-glow-strong:   rgba(158, 158, 130, 0.28);
+    --mira-icon-bg:       rgba(158, 158, 130, 0.16);
+    --mira-icon-border:   rgba(158, 158, 130, 0.34);
+    --mira-pill-bg:       rgba(242, 237, 228, 0.04);
+    --mira-pill-border:   rgba(242, 237, 228, 0.09);
+    --mira-stage-glow:    rgba(158, 158, 130, 0.08);
+    --mira-accent-cta:    #F04500;   /* laranja — só toque de CTA/eyebrow */
+    /* tipografia da marca (Mira lê --mira-font-body no base.css) */
+    --mira-font-display:  'Anton', 'Helvetica Neue Condensed Bold', Impact, sans-serif;
+    --mira-font-body:     'Raleway', 'Helvetica Neue', Arial, sans-serif;
+}

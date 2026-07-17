@@ -1,0 +1,27 @@
+/* MIRA THEME: albatroz-dark
+   ALBATROZ STUDIO — dark quente. Carvão morno + LARANJA da marca (#F04500) como
+   cor viva/dominante (glow, ícones, animação); army/slate como frio de apoio.
+   Tokens espelham studio/brand/design-sys/colors_and_type.css. */
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Raleway:wght@300;400;500;600;700;800&display=swap');
+:root {
+    --mira-primary:       #F04500;   /* laranja CTA da marca — cor dominante */
+    --mira-primary-deep:  #C2370A;   /* laranja profundo (gradientes/barra) */
+    --mira-accent-2:      #F5A888;   /* salmão (accent-200) — realce quente */
+    --mira-crop:          #5F6870;   /* slate — "matéria bruta / estático / frio" */
+    --mira-bg:            #16130E;   /* carvão morno, quase preto com leve oliva */
+    --mira-text:          #F2EDE4;   /* off-white quente da marca */
+    --mira-text-soft:     rgba(242, 237, 228, 0.72);
+    --mira-text-softer:   rgba(242, 237, 228, 0.48);
+    --mira-card-bg:       rgba(242, 237, 228, 0.05);
+    --mira-card-border:   rgba(242, 237, 228, 0.10);
+    --mira-glow-soft:     rgba(240, 69, 0, 0.16);
+    --mira-glow-strong:   rgba(240, 69, 0, 0.28);
+    --mira-icon-bg:       rgba(240, 69, 0, 0.15);
+    --mira-icon-border:   rgba(240, 69, 0, 0.32);
+    --mira-pill-bg:       rgba(242, 237, 228, 0.04);
+    --mira-pill-border:   rgba(242, 237, 228, 0.09);
+    --mira-stage-glow:    rgba(240, 69, 0, 0.07);
+    /* tipografia da marca (Mira lê --mira-font-body no base.css) */
+    --mira-font-display:  'Anton', 'Helvetica Neue Condensed Bold', Impact, sans-serif;
+    --mira-font-body:     'Raleway', 'Helvetica Neue', Arial, sans-serif;
+}

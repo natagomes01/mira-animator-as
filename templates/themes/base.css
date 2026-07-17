@@ -8,7 +8,7 @@ body {
     background: var(--mira-bg);
     min-height: 100vh;
     color: var(--mira-text);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--mira-font-body, 'Inter'), sans-serif;
 }
 
 .primary-color { color: var(--mira-primary); }

@@ -1,5 +1,6 @@
 node_modules/
 .npm-cache/
+.mira-s2v/
 *.log
 .DS_Store
 agents/mira-builder/videos_header/

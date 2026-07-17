@@ -1,0 +1,22 @@
+/* MIRA THEME: albatroz-deco-light (CLARO, premium)
+   ALBATROZ STUDIO — Art Déco sóbrio sobre PAPEL. Off-white quente (base editorial
+   oficial) + BRONZE profundo e ESMERALDA em fio fino, como uma peça foil/tinta
+   sobre papel de convite. Laranja da marca só como faísca de acento.
+   Tokens espelham studio/brand/design-sys/colors_and_type.css. */
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Kameron:wght@400;500;600;700&family=Raleway:wght@300;400;500;600;700;800&display=swap');
+:root {
+    --mira-primary:       #7A5A24;   /* BRONZE profundo — metal sobre papel */
+    --mira-primary-deep:  #5C421A;   /* bronze mais profundo */
+    --mira-accent-2:      #A87E43;   /* bronze médio — realce */
+    --mira-accent-cta:    #F04500;   /* laranja da marca — faísca de acento, escasso */
+    --mira-emerald:       #1E4B3E;   /* esmeralda profundo — linha secundária */
+    --mira-crop:          #8A8F94;   /* slate claro */
+    --mira-bg:            #F2EDE4;   /* off-white quente (papel editorial) */
+    --mira-bg-2:          #E7DBCB;   /* bege quente — base do gradiente */
+    --mira-text:          #202020;   /* carvão — corpo */
+    --mira-text-soft:     rgba(32, 32, 32, 0.70);
+    --mira-text-softer:   rgba(32, 32, 32, 0.45);
+    --mira-font-display:  'Anton', 'Helvetica Neue Condensed Bold', Impact, sans-serif;
+    --mira-font-highlight:'Kameron', Georgia, 'Times New Roman', serif;
+    --mira-font-body:     'Raleway', 'Helvetica Neue', Arial, sans-serif;
+}
