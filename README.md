@@ -74,7 +74,7 @@ You can spell out the template and theme in the same sentence:
 /mira-new create a presentation called 'my-class' with the aula-capitulo template and the mira-dark theme
 ```
 
-**Deck templates:** `aula-capitulo`, `pitch-projeto`, `demo-tecnica`, `sandeco-just-animation-template`, `mira-perfect`.
+**Deck templates:** `mira-default` (default), `aula-capitulo`, `pitch-projeto`, `demo-tecnica`, `sandeco-just-animation-template`.
 **Themes:** `mira-dark`, `light-minimal`, `corporate-blue`, `neon-emerald`.
 
 Then, in Claude: *"fill the deck my-class with content from the reversa source"*.
@@ -108,9 +108,9 @@ mira-extract          reads the linked source and produces a briefing
 mira-planner          slide plan + user approval
 mira-copywriter       text and image refinement
 mira-builder          HTML assembly (glass-cards)
-mira-animator         animations with a mandatory internal loop
+mira-animator         animated metaphors with a mandatory internal loop (create or replace in place)
 mira-size-animator    tunes the perceived size of animations on a 1-10 scale (base 3/10)
-mira-animated-metaphor turns a slide's animation into a visual metaphor of the concept
+mira-animated-metaphor compatibility alias for mira-animator (replace mode)
 mira-visuals          static images: panels, diagrams, charts and infographics
 mira-validator        final conformance report
 ```
@@ -133,6 +133,7 @@ Starting from the 16:9 deck, without touching the original:
 | `mira-vertical` | `index-9x16.html` | 9:16 (1080×1920) | Reels, Shorts, Stories, TikTok |
 | `mira-thirds` | `index-thirds.html` | rule of thirds | leaves a third free for text / presenter video |
 | `mira-studio` | `decks/<name>/` | 9:16 (1080×1920) | recording deck with the presenter's webcam live inside the slide (OBS-ready, native MP4 recording) |
+| `mira-studio-full` | `decks/<name>/index-16x9.html` | 16:9 (1920×1080) | full-hd recording deck with the webcam live inside the slide, roteiro.md-driven slides and an out-of-video teleprompter |
 | `mira-transition-dissolve` | `index-dissolve.html` | dissolve | real crossfade between slides (Canva style) |
 
 `mira-squared` and `mira-vertical` lock the slides to the target ratio (fixed frame) and shrink the side gaps. `mira-thirds` is a **composition** variant (it does not change the ratio): it pushes content into the left two-thirds and leaves the right column free to overlay text, a lower-third or the presenter's video in editing. `mira-transition-dissolve` swaps the scroll between slides for a real crossfade via the View Transitions API, it works on `file://` with no server (Chrome/Edge).
@@ -161,6 +162,7 @@ npx mira-animator link <path>        # link a content source (--name, --type)
 npx mira-animator sources            # list linked sources
 npx mira-animator new <name>         # create a deck from a template
 npx mira-animator edit <deck>        # turn on edit mode (reorder slides) on an existing deck
+npx mira-animator memoria <sub>      # preference memory (lembrancas, nota, consolidar, estado)
 npx mira-animator status             # show install and deck state
 npx mira-animator update             # update agents and templates
 npx mira-animator uninstall          # remove Mira from the current folder
@@ -174,6 +176,7 @@ npx mira-animator uninstall          # remove Mira from the current folder
 | `status` | Shows install and deck state |
 | `update` | Updates agents and templates to the latest version |
 | `uninstall` | Removes Mira from the current folder |
+| `memoria <sub>` | Preference memory. `lembrancas` prints what applies to a slide, `nota` records an explicit order, `consolidar` turns repeated corrections into candidate notes, `estado` activates/suspends/revokes one |
 
 > Creating a deck is **not** a CLI command — you do it conversationally in Claude with `/mira-new` (see [Creating a deck](#creating-a-deck)).
 

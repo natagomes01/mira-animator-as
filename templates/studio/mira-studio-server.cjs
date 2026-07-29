@@ -14,7 +14,9 @@
 
 const http = require('http');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
+const crypto = require('crypto');
 const { execFile, spawn } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -36,11 +38,49 @@ const MIME = {
     '.gif': 'image/gif', '.svg': 'image/svg+xml', '.webp': 'image/webp',
     '.ico': 'image/x-icon', '.woff': 'font/woff', '.woff2': 'font/woff2',
     '.ttf': 'font/ttf', '.glb': 'model/gltf-binary', '.mp4': 'video/mp4',
-    '.webm': 'video/webm', '.mp3': 'audio/mpeg', '.pdf': 'application/pdf'
+    '.webm': 'video/webm', '.mp3': 'audio/mpeg', '.pdf': 'application/pdf',
+    '.md': 'text/markdown; charset=utf-8'
 };
 
 /* limite de uma gravação de deck: o index.html mais pesado não chega perto */
 const MAX_SAVE_BYTES = 25 * 1024 * 1024;
+
+/* memória do Mira: log append-only de evidência de edição. Mora FORA do deck
+   de propósito, o deck publicado é drop-and-run e levaria o perfil junto. */
+const MEMORY_DIR = process.env.MIRA_MEMORY_DIR || path.join(os.homedir(), '.mira-memory');
+const MAX_PREFS_BYTES = 2 * 1024 * 1024;
+
+/* um Salvar = um episódio; cada item do delta vira uma linha JSONL */
+function evidenciaLinhas(body) {
+    if (!body || !Array.isArray(body.itens) || !body.itens.length) return [];
+    const episodio = String(body.episodio || '').slice(0, 64) || 'ep-sem-id';
+    const ts = typeof body.ts === 'string' && body.ts ? body.ts : new Date().toISOString();
+    return body.itens.map(function (it, i) {
+        const item = it || {};
+        return JSON.stringify({
+            schema: String(body.schema || 'delta-cru-v1'),
+            id: episodio + '-' + i,
+            episodio: episodio,
+            ts: ts,
+            fonte: String(body.fonte || 'edicao'),
+            deck: String(body.deck || ''),
+            titulo: String(body.titulo || ''),
+            slides_total: typeof body.slides_total === 'number' ? body.slides_total : null,
+            op_id: item.op_id ? String(item.op_id) : null,
+            slide: typeof item.slide === 'number' ? item.slide : null,
+            tipo: item.tipo ? String(item.tipo) : null,
+            antes: item.antes || null,
+            depois: item.depois || null
+        });
+    });
+}
+function appendEvidencia(body) {
+    const linhas = evidenciaLinhas(body);
+    if (!linhas.length) return 0;
+    fs.mkdirSync(MEMORY_DIR, { recursive: true });
+    fs.appendFileSync(path.join(MEMORY_DIR, 'evidencia.jsonl'), linhas.join('\n') + '\n', 'utf8');
+    return linhas.length;
+}
 
 /* resolve um caminho pedido pelo cliente DENTRO do root servido; devolve
    null em qualquer tentativa de sair dele (path traversal) */
@@ -155,15 +195,16 @@ const server = http.createServer(function (req, res) {
 
     /* caminho absoluto do alvo de gravação (o mira-edit usa para o rótulo da barra) */
     if (url === '/__mira_meta') {
-        let rel = '/index.html';
+        let rel = process.env.MIRA_STUDIO_PAGE || '/index.html';
         try { rel = new URL(req.url, 'http://x').searchParams.get('path') || rel; } catch (e) { }
         const abs = resolveInRoot(rel);
         if (!abs) { json(res, 403, { error: 'fora do root' }); return; }
         json(res, 200, { path: abs });
         return;
     }
-    /* gravação no disco: o "Salvar no arquivo" do deck (bloco #mira-studio-state)
-       e o Salvar da barra do mira-edit. Só HTML, só dentro do root. */
+    /* gravação no disco: o "Salvar no arquivo" do deck (bloco #mira-studio-state),
+       o Salvar da barra do mira-edit e a escrita do roteiro.md pelo teleprompter.
+       Só HTML/Markdown, só dentro do root. */
     if (url === '/__mira_save' && (req.method === 'POST' || req.method === 'PUT')) {
         const chunks = [];
         let size = 0, tooBig = false;
@@ -186,17 +227,63 @@ const server = http.createServer(function (req, res) {
             const abs = resolveInRoot(rel);
             if (!abs) { json(res, 403, { error: 'fora do root' }); return; }
             const ext = path.extname(abs).toLowerCase();
-            if (ext !== '.html' && ext !== '.htm') { json(res, 403, { error: 'só .html/.htm' }); return; }
+            if (ext !== '.html' && ext !== '.htm' && ext !== '.md') { json(res, 403, { error: 'só .html/.htm/.md' }); return; }
+            /* compare-and-set opcional: baseSha = sha256 do conteúdo que o cliente
+               leu antes de editar. Se o arquivo em disco já não bate, ninguém
+               sobrescreve em silêncio: 409 e o cliente decide. */
+            if (typeof body.baseSha === 'string' && body.baseSha) {
+                let atual = null;
+                try { atual = fs.readFileSync(abs, 'utf8'); } catch (e) { /* arquivo novo: segue */ }
+                if (atual !== null) {
+                    const shaAtual = crypto.createHash('sha256').update(atual, 'utf8').digest('hex');
+                    if (shaAtual !== body.baseSha) {
+                        log('conflito de revisão em ' + abs + ' (não gravado)');
+                        json(res, 409, { error: 'conflito: o arquivo mudou desde a leitura', sha: shaAtual });
+                        return;
+                    }
+                }
+            }
             fs.writeFile(abs, content, 'utf8', function (err) {
                 if (err) { json(res, 500, { error: String(err && err.message || err) }); return; }
                 log('salvo: ' + abs + ' (' + size + ' bytes)');
-                json(res, 200, { path: abs, ok: true });
+                json(res, 200, {
+                    path: abs, ok: true,
+                    sha: crypto.createHash('sha256').update(content, 'utf8').digest('hex')
+                });
             });
         });
         return;
     }
 
-    if (url === '/') url = '/index.html';
+    /* evidência de edição: append-only, nunca sobrescreve linha anterior.
+       Falhar aqui não pode atrapalhar o Salvar; o cliente ignora o erro. */
+    if (url === '/__mira_prefs' && req.method === 'POST') {
+        const chunks = [];
+        let size = 0, tooBig = false;
+        req.on('data', function (c) {
+            size += c.length;
+            if (size > MAX_PREFS_BYTES) { tooBig = true; req.destroy(); }
+            else chunks.push(c);
+        });
+        req.on('error', function () { });
+        req.on('end', function () {
+            if (tooBig) { json(res, 413, { error: 'evidência grande demais' }); return; }
+            let body;
+            try { body = JSON.parse(Buffer.concat(chunks).toString('utf8')); }
+            catch (e) { json(res, 400, { error: 'json inválido' }); return; }
+            try {
+                const n = appendEvidencia(body);
+                if (n) log('evidência: ' + n + ' linha(s) em ' + MEMORY_DIR);
+                json(res, 200, { ok: true, linhas: n });
+            } catch (e) {
+                log('falha ao gravar evidência: ' + String(e && e.message || e));
+                json(res, 500, { error: 'falha ao gravar evidência' });
+            }
+        });
+        return;
+    }
+
+    if (url === '/') url = process.env.MIRA_STUDIO_PAGE || '/index.html';
     const file = resolveInRoot(url);
     if (!file) { res.writeHead(403); res.end(); return; }
     fs.readFile(file, function (err, data) {
@@ -208,6 +295,9 @@ const server = http.createServer(function (req, res) {
 
 function chromeCandidates() {
     if (process.env.MIRA_STUDIO_CHROME) return [process.env.MIRA_STUDIO_CHROME];
+    if (process.platform === 'darwin') {
+        return ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'];
+    }
     if (process.platform !== 'win32') return [];
     return [
         process.env.ProgramFiles && path.join(process.env.ProgramFiles, 'Google', 'Chrome', 'Application', 'chrome.exe'),
@@ -224,7 +314,9 @@ function openStudio(url) {
         return;
     }
     const args = [
-        '--no-first-run', '--no-default-browser-check', '--start-maximized', '--new-window',
+        '--no-first-run', '--no-default-browser-check', '--new-window',
+        /* tela cheia opcional (launchers de gravação, ex. o 16:9): F11 já na abertura */
+        process.env.MIRA_STUDIO_FULLSCREEN ? '--start-fullscreen' : '--start-maximized',
         '--force-high-performance-gpu'
     ];
     if (PROFILE) args.unshift('--user-data-dir=' + PROFILE);
@@ -263,7 +355,8 @@ function listen(port, triesLeft) {
         log('  servidor pronto; Ctrl+C encerra.');
         log('  GPU dedicada é preferência do Chrome/Windows; o painel mostra o renderer realmente ativo.');
         log('');
-        openStudio(url);
+        /* página inicial opcional (launchers alternativos, ex. o deck 16:9) */
+        openStudio(url + String(process.env.MIRA_STUDIO_PAGE || '').replace(/^\//, ''));
     };
     const onError = function (err) {
         /* Um callback passado diretamente a server.listen() sobrevive ao

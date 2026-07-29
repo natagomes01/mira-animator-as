@@ -16,6 +16,7 @@ const commands = {
   sources:   () => import('../lib/commands/sources.js'),
   new:       () => import('../lib/commands/new.js'),
   edit:      () => import('../lib/commands/edit.js'),
+  memoria:   () => import('../lib/commands/memoria.js'),
   status:    () => import('../lib/commands/status.js'),
   update:    () => import('../lib/commands/update.js'),
   uninstall: () => import('../lib/commands/uninstall.js'),
@@ -33,9 +34,14 @@ if (!command || command === '--help' || command === '-h') {
                          Opções: --name=<apelido>  --type=projeto|pdf|latex|texto
     sources              Lista as fontes vinculadas
     new <nome>           Cria um novo deck a partir de um template
-                         Opções: --deck=aula-capitulo|pitch-projeto|demo-tecnica|sandeco-just-animation-template|mira-perfect|albatroz-deco
-                                 --theme=mira-dark|light-minimal|corporate-blue|neon-emerald|albatroz-dark|albatroz-army|albatroz-deco|albatroz-deco-light
+                         Opções: --deck=<template>  --theme=<tema>
+                         Rode "npx mira-animator new" sem nome para ver os
+                         templates e temas disponíveis (lidos de templates/).
     edit <deck>          Liga o modo edição (reordenar slides, tecla E) num deck já existente
+    memoria <sub>        Memória de preferências do usuário
+                         lembrancas [--papel capa] [--formato 16x9]  pacote pro builder
+                         nota "<frase>" --eixo <eixo> [--papel capa]  grava uma ordem
+                         listar | onde
     status               Mostra o estado da instalação e dos decks
     update               Atualiza agents e templates para a última versão
     uninstall            Remove o Mira da pasta atual
