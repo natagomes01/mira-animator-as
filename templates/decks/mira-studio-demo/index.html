@@ -25,7 +25,12 @@
             --line: rgba(255, 255, 255, .12);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { background: #333333; scroll-behavior: smooth; scroll-snap-type: y proximity; }
+        /* Sem scroll-behavior: smooth. A transição do deck é o dissolve (View
+           Transitions), e o salto é sempre 'instant'. Com o scroll animado,
+           window.scrollY fica num valor intermediário por centenas de ms e
+           quem lê o slide atual a partir dele erra o índice: a tecla salta
+           dois ou três slides e a volta não sai do lugar. */
+        html { background: #333333; scroll-snap-type: y proximity; }
         body {
             background: #333333;
             color: var(--ink);
@@ -788,11 +793,36 @@
            ============================================================ */
         (function () {
             var secs = Array.prototype.slice.call(document.querySelectorAll('body > section'));
-            function current() {
-                var best = 0;
-                for (var i = 0; i < secs.length; i++) if (secs[i].offsetTop <= window.scrollY + 4) best = i;
+            /* O índice é ESTADO, não leitura do scroll. Derivar o slide atual de
+               window.scrollY a cada tecla quebra durante a gravação: o main
+               thread está ocupado (encoder, câmera, d3), o scroll leva mais
+               tempo para assentar e a leitura sai adiantada. Aí go(+1) soma
+               sobre um índice errado (salta vários slides) e o go(-1) morre no
+               'i === from' (não volta). */
+            var idx = 0;
+            var saltoAte = 0;   /* janela em que o scroll é nosso, não do usuário */
+
+            /* Mesmo critério do currentSection() do mira/mira-record.js e do
+               teleprompter (meio do viewport): o slide que você vê, o slide que
+               o Element Capture restringe e o texto do prompter têm que ser o
+               mesmo. Só é usado para ressincronizar depois de roda ou barra. */
+            function doScroll() {
+                var best = 0, mid = window.scrollY + window.innerHeight * 0.5;
+                for (var i = 0; i < secs.length; i++) if (secs[i].offsetTop <= mid) best = i;
                 return best;
             }
+            /* roda, trackpad, barra de rolagem e resize mexem no scroll sem
+               passar por go(): ressincroniza quando o movimento assenta */
+            var sinc = null;
+            window.addEventListener('scroll', function () {
+                clearTimeout(sinc);
+                sinc = setTimeout(function () {
+                    if (performance.now() < saltoAte) return;
+                    idx = doScroll();
+                }, 140);
+            }, { passive: true });
+            window.addEventListener('load', function () { idx = doScroll(); });
+
             function dissolve(jump) {
                 /* View Transitions tira snapshots old/new. Durante a captura
                    da própria guia isso pode criar hitch e gap no MP4; a
@@ -802,9 +832,13 @@
                 if (document.startViewTransition) document.startViewTransition(jump); else jump();
             }
             function go(d) {
-                var from = current();
+                var from = idx;
                 var i = Math.max(0, Math.min(secs.length - 1, from + d));
                 if (i === from) return;
+                /* compromete o índice ANTES do scroll: a próxima tecla parte
+                   do destino, mesmo que a página ainda não tenha assentado */
+                idx = i;
+                saltoAte = performance.now() + 500;
                 /* mira-record abre uma janela de diagnóstico para long task,
                    rAF e gap PTS exatamente no momento da navegação. */
                 try { window.dispatchEvent(new CustomEvent('mira-navigation', {
@@ -815,6 +849,12 @@
             }
             document.addEventListener('keydown', function (e) {
                 if (document.body.classList.contains('me-on') || document.body.classList.contains('md-on')) return;
+                /* auto-repeat do sistema: o macOS repete a ~30 ms depois de ~500 ms
+                   segurando. Sem este guard, um toque um pouco mais longo varre
+                   três ou quatro slides de uma vez, e no meio de uma gravação é
+                   exatamente o que acontece, porque a tela demora a responder e
+                   quem apresenta segura a tecla esperando. Um toque, um slide. */
+                if (e.repeat) return;
                 var t = e.target;
                 if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName || ''))) return;
                 if (e.ctrlKey || e.metaKey || e.altKey) return;
