@@ -7,6 +7,11 @@ agents/mira-builder/videos_header/
 templates/videos_header/
 decks/**/assets/*.glb
 
+# Chaves de API locais (ex.: GEMINI_API_KEY). Nunca vao para o repo.
+.env
+.env.*
+!.env.example
+
 # MkDocs build output
 .site/
 
@@ -39,6 +44,7 @@ decks/*
 !decks/mira-launch/
 !decks/mira-edit-livre-demo/
 !decks/site-mira-responsivo/
+!decks/you-shall-not-pass/
 
 # Videos de teste pesados nos decks
 decks/**/*.mp4
@@ -61,3 +67,10 @@ mira.config.json
 
 # Registro de geracao do /mira-fast: fica no disco para inspecao, fora do repo
 decks/**/mira/fast/
+
+# Saida de instalar o Mira dentro do proprio repo fonte.
+# Instalar aqui e o jeito de os agentes virarem /comando durante o
+# desenvolvimento, mas o resultado e copia do que ja esta versionado em
+# agents/ e templates/, entao commitar seria duplicar o repo dentro dele.
+mira-templates/
+.mira/

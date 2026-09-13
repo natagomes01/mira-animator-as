@@ -17,6 +17,8 @@ const commands = {
   new:       () => import('../lib/commands/new.js'),
   edit:      () => import('../lib/commands/edit.js'),
   memoria:   () => import('../lib/commands/memoria.js'),
+  plugin:    () => import('../lib/commands/plugin.js'),
+  storyboard: () => import('../lib/commands/storyboard.js'),
   status:    () => import('../lib/commands/status.js'),
   update:    () => import('../lib/commands/update.js'),
   uninstall: () => import('../lib/commands/uninstall.js'),
@@ -34,14 +36,27 @@ if (!command || command === '--help' || command === '-h') {
                          Opções: --name=<apelido>  --type=projeto|pdf|latex|texto
     sources              Lista as fontes vinculadas
     new <nome>           Cria um novo deck a partir de um template
-                         Opções: --deck=<template>  --theme=<tema>
+                         Opções: --deck=<template>  --theme=<tema>  --cinema
+                         --cinema: câmera, profundidade e grade de cor, com o
+                         modo câmera na tecla C e um servidor.bat na raiz do
+                         deck (autorar é por ele, apresentar é por file://).
                          Rode "npx mira-animator new" sem nome para ver os
                          templates e temas disponíveis (lidos de templates/).
     edit <deck>          Liga o modo edição (reordenar slides, tecla E) num deck já existente
     memoria <sub>        Memória de preferências do usuário
                          lembrancas [--papel capa] [--formato 16x9]  pacote pro builder
                          nota "<frase>" --eixo <eixo> [--papel capa]  grava uma ordem
+                         consolidar [--simular] | estado <arquivo> <estado>
                          listar | onde
+    plugin <sub>         Plugins do usuário (pasta mira-plugins/)
+                         list | sync | validate [<id>] | pack <id> | add <arquivo>
+                         Instalar é colocar a pasta; desinstalar é apagar
+    storyboard <sub>     Concept Storyboard, o rascunho que valida a ideia antes
+                         de virar animação
+                         render <pasta>  cenas .json -> .svg + .png + folha de contato
+                                         Opção: --no-png
+                         verify <deck>   o conceito aprovado chegou nos slides?
+                                         Só relata, nunca corrige
     status               Mostra o estado da instalação e dos decks
     update               Atualiza agents e templates para a última versão
     uninstall            Remove o Mira da pasta atual

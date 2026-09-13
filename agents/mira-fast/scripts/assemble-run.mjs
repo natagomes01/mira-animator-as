@@ -5,12 +5,13 @@ import {
   readFileSync,
   renameSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validateRun } from './validate-run.mjs';
+import { countSections, validateRun } from './validate-run.mjs';
 
 export const SLOT_MARKERS = Object.freeze({
   cssStart: '<!-- @MIRA:FAST:CSS:START -->',
@@ -121,6 +122,24 @@ ${entries}
 })();`;
 }
 
+/**
+ * Carimba a identidade do slide na <section>, pareada com o
+ * `<!-- mira-slide-id -->` que o buildRoteiro escreve no bloco correspondente.
+ *
+ * É esse par que permite ao builder do deck casar bloco com seção por
+ * IDENTIDADE em vez de posição. Sem ele, reordenar os blocos no editor movia
+ * título e fala e deixava o palco <slug>-stage parado embaixo do texto do
+ * vizinho: a animação seguia tocando, no slide errado.
+ *
+ * O valor é o `slug_stage`, que o plano já garante único por slide e que é
+ * legível para quem abrir o arquivo. Fragmento que já traga o atributo é
+ * respeitado; a montagem não sobrescreve identidade declarada pela folha.
+ */
+function stampSlideId(html, slide) {
+  if (/\bdata-mira-slide-id\s*=/.test(html)) return html;
+  return html.replace(/<section\b/i, `<section data-mira-slide-id="${slide.slug_stage}"`);
+}
+
 function buildRoteiro(plan) {
   if (!['mira-studio', 'mira-studio-full'].includes(plan.formato)) return null;
   const layouts = plan.formato === 'mira-studio'
@@ -136,9 +155,46 @@ function buildRoteiro(plan) {
     const fields = [`## Slide ${slide.n}`, slide.layout];
     if (slide.titulo && slide.layout !== 'camera') fields.push(slide.titulo);
     if (slide.animacao_declarativa) fields.push(String(slide.animacao_declarativa));
-    lines.push(fields.filter(Boolean).join(' | '), '', slide.fala ?? '', '');
+    /* a identidade do bloco, pareada com o data-mira-slide-id da <section>.
+       É metadado, não fala: o parser do deck a extrai e a mantém fora do
+       teleprompter e do overlay lido em câmera. */
+    lines.push(
+      fields.filter(Boolean).join(' | '),
+      `<!-- mira-slide-id: ${slide.slug_stage} -->`,
+      '',
+      slide.fala ?? '',
+      '',
+    );
   }
   return `${lines.join('\n').trimEnd()}\n`;
+}
+
+/**
+ * Array de fala que o teleprompter usa quando não há `roteiro.md`, isto é, em
+ * `file://`. Os templates Studio trazem as falas do próprio deck de demonstração
+ * ali dentro, e a montagem herdava o runtime inteiro sem tocar nelas: todo deck
+ * gerado nascia com o texto de exemplo do Mira (BUG-20260731-RNYU).
+ *
+ * Os dois formatos declaram o mesmo fallback com nomes diferentes.
+ */
+const SCRIPT_FALLBACK = Object.freeze({
+  'mira-studio': /(window\.__miraScript\s*=\s*)\[[\s\S]*?\]/,
+  'mira-studio-full': /(\bvar\s+SCRIPT\s*=\s*)\[[\s\S]*?\]/,
+});
+
+function applyScriptFallback(html, plan) {
+  const pattern = SCRIPT_FALLBACK[plan.formato];
+  if (!pattern) return { html, status: 'formato sem teleprompter' };
+  const matches = html.match(new RegExp(pattern.source, 'g')) ?? [];
+  if (matches.length === 0) return { html, status: 'array de fallback ausente no esqueleto' };
+  if (matches.length > 1) throw new Error(`array de fala do teleprompter duplicado no esqueleto: ${matches.length} ocorrências`);
+
+  const falas = plan.slides.map((slide) => slide.fala ?? '');
+  const literal = `[\n${falas.map((fala) => `                ${JSON.stringify(fala)}`).join(',\n')}\n            ]`;
+  return {
+    html: html.replace(pattern, (_, prefixo) => `${prefixo}${literal}`),
+    status: `${falas.length} do plano`,
+  };
 }
 
 function findTemplateDir(projectRoot, kind) {
@@ -157,25 +213,45 @@ function copyRequired(source, destination) {
   copyFileSync(source, destination);
 }
 
-function installRuntime(projectRoot, deckDir, format) {
+/**
+ * Resolve o que a montagem vai copiar, sem copiar nada e sem escrever no deck.
+ *
+ * Separar o plano da execução é o que permite conferir todas as fontes antes de
+ * tocar no deck: montagem que falha não pode deixar launcher e módulos numa raiz
+ * sem `index.html` (BUG-20260731-ETPU).
+ */
+function runtimePlan(projectRoot, deckDir, format) {
   const modules = FORMAT_MODULES[format];
   if (!modules) throw new Error(`formato sem módulos definidos: ${format}`);
   const authoringDir = findTemplateDir(projectRoot, 'authoring');
-  for (const module of modules) {
-    copyRequired(join(authoringDir, module), join(deckDir, 'mira', module));
+  const copies = modules.map((module) => ({
+    from: join(authoringDir, module),
+    to: join(deckDir, 'mira', module),
+  }));
+
+  if (STUDIO_FILES[format]) {
+    const studioDir = findTemplateDir(projectRoot, 'studio');
+    const vendorDir = findTemplateDir(projectRoot, 'vendor');
+    copies.push({
+      from: join(studioDir, 'mira-studio-server.cjs'),
+      to: join(deckDir, 'mira', 'mira-studio-server.cjs'),
+    });
+    for (const launcher of STUDIO_FILES[format]) {
+      copies.push({ from: join(studioDir, launcher), to: join(deckDir, launcher) });
+    }
+    for (const vendor of ['d3.v7.min.js', 'mp4-muxer.js']) {
+      copies.push({ from: join(vendorDir, vendor), to: join(deckDir, 'assets', 'vendor', vendor) });
+    }
   }
 
-  if (!STUDIO_FILES[format]) return modules;
-  const studioDir = findTemplateDir(projectRoot, 'studio');
-  const vendorDir = findTemplateDir(projectRoot, 'vendor');
-  copyRequired(join(studioDir, 'mira-studio-server.cjs'), join(deckDir, 'mira', 'mira-studio-server.cjs'));
-  for (const launcher of STUDIO_FILES[format]) {
-    copyRequired(join(studioDir, launcher), join(deckDir, launcher));
-  }
-  for (const vendor of ['d3.v7.min.js', 'mp4-muxer.js']) {
-    copyRequired(join(vendorDir, vendor), join(deckDir, 'assets', 'vendor', vendor));
-  }
-  return modules;
+  const faltando = copies.filter((copy) => !existsSync(copy.from)).map((copy) => copy.from);
+  if (faltando.length) throw new Error(`arquivo obrigatório ausente: ${faltando.join(', ')}`);
+  return { modules, copies };
+}
+
+function installRuntime(plan) {
+  for (const copy of plan.copies) copyRequired(copy.from, copy.to);
+  return plan.modules;
 }
 
 function stripModuleTags(html, modules) {
@@ -194,7 +270,7 @@ function buildModuleTags(modules) {
   return modules.map((module) => `<script defer src="mira/${module}"></script>`).join('\n');
 }
 
-function validateSkeleton(skeleton, format) {
+export function validateSkeleton(skeleton, format) {
   const errors = [];
   for (const marker of Object.values(SLOT_MARKERS)) {
     if (count(skeleton, marker) !== 1) errors.push(`marcador de esqueleto ausente ou duplicado: ${marker}`);
@@ -230,7 +306,7 @@ function validateSkeleton(skeleton, format) {
   }
   if (slidesStart >= 0 && slidesEnd > slidesStart) {
     const outside = `${skeleton.slice(0, slidesStart)}${skeleton.slice(slidesEnd + SLOT_MARKERS.slidesEnd.length)}`;
-    if (/<section\b/i.test(outside)) errors.push('esqueleto contém <section> fora do slot de slides');
+    if (countSections(outside) > 0) errors.push('esqueleto contém <section> fora do slot de slides');
   }
   return errors;
 }
@@ -271,11 +347,25 @@ function publishOutput(outputPath, content) {
     }
   }
 
-  rmSync(backupPath, { force: true });
+  // O plano B abaixo (guardar o antigo de lado e repor) existe para o arquivo
+  // TRAVADO por outro processo, caso clássico do Windows (EPERM/EACCES). Ele
+  // NÃO se aplica quando o caminho de saída é uma PASTA: mover a pasta do
+  // usuário para o lado e pôr um arquivo no lugar destruiria o conteúdo dela em
+  // silêncio. Aqui a publicação falha limpa, sem deixar nada para trás, e o
+  // runtime não chega a ser instalado (BUG-20260731-ETPU).
+  if (statSync(outputPath).isDirectory()) {
+    rmSync(tempPath, { force: true });
+    throw new Error(`caminho de saída existe e é uma pasta, não um arquivo: ${outputPath}`);
+  }
+
+  // `recursive` é obrigatório: sem ele o rmSync estoura com ERR_FS_EISDIR se o
+  // `.bak` que sobrou de uma execução anterior for uma pasta, e aí toda
+  // publicação seguinte falharia por causa de um resto.
+  rmSync(backupPath, { recursive: true, force: true });
   renameSync(outputPath, backupPath);
   try {
     renameSync(tempPath, outputPath);
-    rmSync(backupPath, { force: true });
+    rmSync(backupPath, { recursive: true, force: true });
   } catch (error) {
     if (existsSync(backupPath) && !existsSync(outputPath)) renameSync(backupPath, outputPath);
     rmSync(tempPath, { force: true });
@@ -316,10 +406,16 @@ export function assembleRun(deckPath, options = {}) {
       return { slide, ...extractFragment(fragment, slide) };
     });
 
-    const modules = installRuntime(projectRoot, deckDir, plan.formato);
+    // Resolve e confere as fontes do runtime, mas NÃO copia nada ainda: a
+    // instalação só acontece depois que a saída passou por todas as checagens e
+    // foi publicada (BUG-20260731-ETPU).
+    const runtime = runtimePlan(projectRoot, deckDir, plan.formato);
+    const { modules } = runtime;
     skeleton = stripModuleTags(skeleton, modules);
+    const fallback = applyScriptFallback(skeleton, plan);
+    skeleton = fallback.html;
     const slides = parts
-      .map(({ slide, html }) => `<!-- @MIRA:FAST:SLIDE ${String(slide.n).padStart(2, '0')} ${slide.slug_stage} -->\n${html}`)
+      .map(({ slide, html }) => `<!-- @MIRA:FAST:SLIDE ${String(slide.n).padStart(2, '0')} ${slide.slug_stage} -->\n${stampSlideId(html, slide)}`)
       .join('\n\n');
     const css = `<style id="mira-fast-generated">\n${parts
       .map(({ slide, css: value }) => `/* slide ${String(slide.n).padStart(2, '0')}: ${slide.slug_stage} */\n${value}`)
@@ -336,9 +432,13 @@ export function assembleRun(deckPath, options = {}) {
     output = replaceSlot(output, SLOT_MARKERS.jsStart, SLOT_MARKERS.jsEnd, js);
     output = `${output.trimEnd()}\n`;
 
-    const sectionCount = (output.match(/<section\b/gi) ?? []).length;
+    const sectionCount = countSections(output);
     if (sectionCount !== plan.slides.length) {
-      throw new Error(`saída possui ${sectionCount} section(s), esperado ${plan.slides.length}`);
+      const suspeitos = parts
+        .filter(({ html }) => countSections(html) !== 1)
+        .map(({ slide, html }) => `slide ${slide.n} (${slide.slug_stage}): ${countSections(html)}`);
+      const detalhe = suspeitos.length ? `; fragmento(s) fora do esperado: ${suspeitos.join(', ')}` : '';
+      throw new Error(`saída possui ${sectionCount} section(s), esperado ${plan.slides.length}${detalhe}`);
     }
     for (const module of modules) {
       if (count(output, `src="mira/${module}"`) !== 1) throw new Error(`módulo duplicado ou ausente: ${module}`);
@@ -346,11 +446,25 @@ export function assembleRun(deckPath, options = {}) {
 
     const outputPath = join(deckDir, plan.arquivo_saida);
     publishOutput(outputPath, output);
+    installRuntime(runtime);
 
+    // O roteiro.md é do usuário: a montagem só o semeia quando ele não existe.
+    // Re-montar um deck editado não pode apagar fala escrita à mão nem a que o
+    // teleprompter gravou sozinho (BUG-20260731-JJ6X).
     const roteiro = buildRoteiro(plan);
-    if (roteiro !== null) writeFileSync(join(deckDir, 'roteiro.md'), roteiro, 'utf8');
+    const roteiroPath = join(deckDir, 'roteiro.md');
+    let roteiroStatus = 'não se aplica a este formato';
+    if (roteiro !== null) {
+      if (existsSync(roteiroPath)) {
+        roteiroStatus = 'preservado (já existia; a montagem não sobrescreve)';
+      } else {
+        writeFileSync(roteiroPath, roteiro, 'utf8');
+        roteiroStatus = 'criado a partir do plano';
+      }
+    }
 
     log.push(`formato: ${plan.formato}`, `slides: ${plan.slides.length}`, `saida: ${basename(outputPath)}`);
+    log.push(`falas: ${fallback.status}`, `roteiro.md: ${roteiroStatus}`, `runtime: ${runtime.copies.length} arquivo(s) instalado(s)`);
     for (const result of leafResults) {
       log.push(`slide ${result.n}: ok=${result.ok !== false}; attempts=${result.attempts ?? '?'}; validation=${result.validation ?? 'pass'}`);
     }

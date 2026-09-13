@@ -18,6 +18,10 @@ description: >-
 
 # Skill: Mira Studio Full (16:9 com câmera embutida, gravação nativa)
 
+## Ordem zero — não negociável
+
+A primeira ação é resolver `deck_id = YYYY-MM-DD <slug>` com a data atual e criar, de uma vez, a pasta do deck e toda a árvore interna: `references/`, `assets/`, `assets/vendor/` e `mira/`. Nenhuma dessas pastas fica para depois. Isso acontece antes de mensagem intermediária, pergunta, leitura do deck de referência, coleta de roteiro, escolha de layout ou geração.
+
 Cria decks horizontais 16:9 full-hd para gravação de videoaula em que o apresentador aparece AO VIVO dentro do próprio slide. Cada slide declara um layout no `roteiro.md`:
 
 - **`camera`** — a webcam preenche o quadro inteiro (você falando).
@@ -33,7 +37,7 @@ Cria decks horizontais 16:9 full-hd para gravação de videoaula em que o aprese
 
 ## O resultado, em uma frase
 
-Um quadro 16:9 cravado à janela (letterbox `#333333` quando a tela não é 16:9) chamado `index-16x9.html`, onde cada `body > section` declara `data-layout="camera|thirds|full"`, os slides NASCEM do `roteiro.md` (layout, título e animação `linha:`/`orbita:` por cabeçalho; texto da fala sincronizando ao vivo), a webcam entra ao vivo pelas `.cam-area` (`mira/mira-camera.js`), o teleprompter em overlay fica FORA do vídeo via Element Capture, e a tecla **R** grava um MP4 1920x1080 direto no disco pelo `mira/mira-record-16x9.js`, sem OBS.
+Um quadro 16:9 cravado à janela (letterbox `#000000` quando a tela não é 16:9) chamado `index-16x9.html`, onde cada `body > section` declara `data-layout="camera|thirds|full"`, os slides NASCEM do `roteiro.md` (layout, título e animação `linha:`/`orbita:` por cabeçalho; texto da fala sincronizando ao vivo), a webcam entra ao vivo pelas `.cam-area` (`mira/mira-camera.js`), o teleprompter em overlay fica FORA do vídeo via Element Capture, e a tecla **R** grava um MP4 1920x1080 direto no disco pelo `mira/mira-record-16x9.js`, sem OBS.
 
 ## Diferenças para o /mira-studio (não confunda)
 
@@ -53,7 +57,7 @@ Pedido de vertical/Reels/Shorts dentro desta skill: aponte para `/mira-studio`.
 
 O quadro é 16:9 cravado e generalista para a tela: `--fmt-w: min(100vw, calc(100vh * 16 / 9))` e `--fmt-h: min(100vh, calc(100vw * 9 / 16))`. Em tela cheia num display 1080p fecha exatos 1920x1080; em janela menor encolhe mantendo a proporção. Regras que acompanham (todas no deck de referência):
 
-- `body > section` com `margin: calc((100vh - var(--fmt-h)) / 2) 0` e `scroll-margin-top` igual: a sobra vertical vira faixa `#333` acima e abaixo, nunca o slide seguinte.
+- `body > section` com `margin: calc((100vh - var(--fmt-h)) / 2) 0` e `scroll-margin-top` igual: a sobra vertical vira faixa `#000` acima e abaixo, nunca o slide seguinte.
 - `html` com `scroll-snap-type: y proximity`, `scrollbar-width: none` e `overflow-x: hidden`: a barra de rolagem roubava largura e criava scroll horizontal em F11. Navegação por teclado ou roda do mouse.
 - `body > section { isolation: isolate }` é PRÉ-REQUISITO do Element Capture: sem stacking context o Chrome aceita o `restrictTo` e não emite frame nenhum (o MP4 sai vazio).
 - `thirds`: `.thirds-main` com `width: 66.667%`, `padding: 50px` (área segura onde título e animação vivem), `h2` centrado no topo; `.cam-area` com `width: 33.333%` e `border-left: 1px solid var(--line)`.
@@ -74,7 +78,9 @@ Todo deck gerado leva um **`roteiro.md` na raiz**: é dele que saem os slides E 
 - `layout` (obrigatório): `camera`, `thirds` ou `full`, comparado em minúsculas. Valor desconhecido cai em `camera`.
 - `Título` (thirds/full): `*entre asteriscos*` vira `<span class="accent">`, montado por fragmento (**nunca `innerHTML`**).
 - `animação` (thirds/full): **`linha: A, B, C, D`** (etapas em diagonal, orbe percorrendo e acendendo cada nó com pulso) ou **`orbita: A, B, C @ NÚCLEO`** (satélites girando em elipse em torno do núcleo). Sem o campo ou valor inválido, cai em `linha` padrão.
-- O número do cabeçalho é **rótulo, não índice**: o mapeamento é sempre pela ordem de aparição.
+- O número do cabeçalho é **rótulo, não índice**, e continua sendo.
+- **Quem casa bloco com slide é a identidade, não a ordem.** Cada bloco leva `<!-- mira-slide-id: X -->` na linha abaixo do cabeçalho e a `<section>` correspondente leva `data-mira-slide-id="X"`. Reordenar os blocos no editor ou os slides no modo E dá o mesmo resultado: o slide anda inteiro, com palco, título e fala. Faltando id de um dos lados, cai no casamento por ordem de aparição de antes (deck antigo não precisa de migração). Detalhes em `_reversa_sdd/addenda/roteiro-identidade-de-slide-v001.md`.
+- O `mira-slide-id` é **metadado, não fala**: fica fora do teleprompter e do overlay lido em câmera.
 - O texto abaixo do cabeçalho é a fala do slide (teleprompter e overlay).
 
 **O que sincroniza e o que não:**
@@ -100,7 +106,7 @@ Os dois geradores estão no deck de referência; copie-os como estão. Regras qu
 - `casarPalco` (viewBox casado ao box real do palco) + `fitOnce` sobre a parte ESTÁTICA, uma vez (reenquadrar a cada frame faz o palco reescalar junto com o que se move).
 - Todo callback de `d3.timer` dentro de `try/catch`: uma exceção congela a fila inteira de timers do d3.
 - Texto SVG: `font-size >= 24` para `W = 960`; cor da marca `#FF904D` via variáveis do tema; sem arco-íris.
-- Animação AUTORAL além das duas: permitida, presa ao palco `svg#sv-slide-N` (N = posição do slide no arquivo), seguindo as mesmas regras. Palco sem animação fica vazio em vez de quebrar.
+- Animação AUTORAL além das duas: permitida, presa ao palco `svg#sv-slide-N` (N = posição do slide no arquivo), seguindo as mesmas regras e o padrão criativo do `agents/mira-animator/SKILL.md`: metáfora primeiro, animação depois (método A/B antes de codar), refinamento sob demanda por slide, e espaço vazio preenchido com cenário ambiente da própria metáfora (parado ou em deriva lenta, nunca focal). As declarativas `linha`/`orbita` continuam como estão, mas devem preencher o palco. Palco sem animação fica vazio em vez de quebrar.
 
 ## Teleprompter que não entra no vídeo
 
@@ -128,7 +134,7 @@ Fonte canônica em `templates/authoring/mira-record-16x9.js`; copie para `mira/`
 - **Contagem regressiva 3-2-1** antes de iniciar (fora do vídeo: aparece antes do pipeline).
 - **Saída H.264 `avc1` com resolução constante por sessão:** **1920x1080** em Alta (padrão de videoaula) ou a resolução **16:9 nativa da janela** em Desempenho (menos pixels a codificar, a alavanca real para máquina fraca). Bitrate 12 Mbps escalado proporcionalmente; keyframe a cada 2 s.
 - **Pipeline em Worker** idêntico ao padrão comprovado do 9:16: `MediaStreamTrackProcessor` puxa `VideoFrame`s da track restringida/recortada, o `readable` é transferido ao Worker (Blob URL, sem arquivo extra), `VideoEncoder` com backpressure (`encodeQueueSize>=2` descarta não-chave), áudio AAC no mesmo Worker, mux `mp4-muxer` com `firstTimestampBehavior: 'offset'` (por trilha — **nunca** `cross-track-offset`). O main thread só renderiza a página.
-- **CFR (edição) — o MP4 entra no Premiere sem drift de áudio:** chave no painel, **ligada por padrão**, idêntica à do 9:16. O Worker põe cada frame num slot da grade de 1/FPS antes do encoder e preenche slot vazio com o quadro anterior (teto de 2 s). Sem isso a trilha sai VFR: VLC e Chrome tocam certo (honram PTS), mas o Premiere conforma VFR numa grade fixa e a boca desencontra da voz de forma PROGRESSIVA. Painel mostra `N dup` / `N salto`; o JSON traz `timing: {mode, dupFilled, dupDropped, gapJumped}`. Desligada, volta ao VFR de antes.
+- **CFR (edição) — o MP4 entra no Premiere sem drift de áudio:** chave no painel, **ligada por padrão**, idêntica à do 9:16. O Worker põe cada frame num slot da grade de 1/FPS antes do encoder e preenche slot vazio com o quadro anterior (teto de 2 s). Sem isso a trilha sai VFR: VLC e Chrome tocam certo (honram PTS), mas o Premiere conforma VFR numa grade fixa e a boca desencontra da voz de forma PROGRESSIVA. Painel mostra `N dup` / `N salto`; o JSON traz `timing: {mode, dupFilled, dupDropped, gapJumped}`. Desligada, volta ao VFR de antes. **A grade CFR trata a deriva PROGRESSIVA e só ela.** O deslocamento CONSTANTE entre as trilhas é outro defeito (BUG-20260815-HYRG, corrigido em 2026-08-16): o vídeo chega ao muxer já rebaseado em zero pela grade e o áudio no relógio nativo, então `firstTimestampBehavior: 'offset'` zerava cada trilha na própria origem e jogava fora a distância entre elas. Hoje quem alinha é o gravador, em `mandaAoMux()`, e o desvio medido aparece no painel (`A/V ±N ms`) e no diagnóstico (`av: {firstVideoUs, firstAudioUs, deltaMs}`). Contrato no adendo `_reversa_sdd/addenda/bug-BUG-20260815-HYRG-v001.md`. Trocar a constante do muxer sem esse alinhamento reintroduz o commit `6e84363`.
 - **Seletores de câmera e microfone no painel**, com medidor de nível (VU) do microfone. A troca de câmera é AO VIVO (`window.__miraCameraUse` do `mira-camera.js`), persiste em `mira-cam-device` e vale para os próximos loads.
 - **Encoder Auto / Hardware preferido / Software (CPU)** (`hardwareAcceleration` é preferência, não garantia) e as três informações separadas: GPUs instaladas (`/__mira/gpus`, via launcher), renderer ativo (WebGL) e a preferência do encoder. GPUs instaladas nunca viram opções do encoder.
 - **Gravação direta no disco** (File System Access + `FileSystemWritableFileStreamTarget`, `fastStart: false`): escolhe o arquivo uma vez antes de começar, nada acumula em RAM, sem teto de duração. Preço honesto: o índice `moov` vai para o fim; travamento no meio deixa MP4 sem índice. Fallback in-memory (~2 GB de teto, aviso ~384 MB, para sozinha ~512 MB) quando não há File System Access.
@@ -155,8 +161,9 @@ Setas/espaço navegam · **T** painel do roteiro · **O** overlay de leitura · 
 
 ## Passos
 
-1. **Colher o roteiro.** Liste com o usuário os slides e o layout de cada um (`camera` ou `thirds`); sem layout declarado, pergunte. Para cada `thirds`, defina título curto e a animação (`linha:` com 2+ etapas ou `orbita:` com satélites e núcleo). A fala de cada slide vai para o **`roteiro.md`**, não para dentro do HTML. Diga em uma linha que dá para editar esse arquivo com o deck aberto (~1,5 s).
-2. **Criar a estrutura.** `decks/<nome>/` com `index-16x9.html` (a partir do deck de referência), **`roteiro.md`** (um bloco `## Slide` por slide combinado, com a fala do usuário e a intro documentando a gramática), `mira/` (edit, edit-free, draw, camera, record-16x9 copiados de `templates/authoring/` + `mira-studio-server.cjs` de `templates/studio/`), `assets/vendor/mp4-muxer.js` e `assets/vendor/d3.v7.min.js` (de `templates/vendor/`), e os launchers `mira-studio-16x9-windows.bat` / `mira-studio-16x9-apple.command` na raiz (de `templates/studio/`).
+1. **Criar toda a estrutura — primeira ação obrigatória.** Antes de perguntar pelo roteiro, ler referências, escolher layouts ou gerar qualquer arquivo, derive o slug do pedido (ou use `novo-deck-studio-full`, com sufixo anticolisão), resolva `deck_id = YYYY-MM-DD <slug>` e crie `decks/<deck_id>/`, `references/`, `assets/`, `assets/vendor/` e `mira/`. Informe o caminho absoluto de `references/`. Nenhuma outra ação pode vir antes desta.
+2. **Colher o roteiro.** Liste com o usuário os slides e o layout de cada um (`camera` ou `thirds`); sem layout declarado, pergunte. Para cada `thirds`, defina título curto e a animação (`linha:` com 2+ etapas ou `orbita:` com satélites e núcleo). A fala de cada slide vai para o **`roteiro.md`**, não para dentro do HTML. Diga em uma linha que dá para editar esse arquivo com o deck aberto (~1,5 s).
+   Depois, complete a estrutura com `index-16x9.html`, **`roteiro.md`**, módulos em `mira/`, vendor em `assets/vendor/` e os launchers na raiz. As pastas já existentes são reutilizadas, nunca recriadas nem abandonadas.
 3. **Gerar os slides.** No `roteiro.md`, cabeçalhos com layout/título/animação; no HTML, as `body > section` equivalentes como fallback de `file://` (mesma ordem, mesmos títulos). `.cam-area` em toda seção. As animações declarativas saem dos geradores canônicos; animação autoral extra se prende ao palco `sv-slide-N`.
 4. **Conferir os blocos canônicos.** Bloco de formato 16:9 (com `isolation: isolate` e o letterbox), builder do roteiro ANTES das animações e dos `<script defer>`, `fitTitles`, navegação com dissolve, teleprompter completo (painel + overlay + rolagem L/+/- + sincronização + `SCRIPT[]` fallback + bloco `#mira-studio-state` + seed por hash + salvar/Ctrl+S), desenho por slide, cheat-sheet `?`, e os cinco `<script defer src="mira/...">` antes de `</body>` nesta ordem: `mira-edit.js` → `mira-edit-free.js` → `mira-draw.js` → `mira-camera.js` → `mira-record-16x9.js`.
 5. **Verificar.** Servido pelo launcher: quadro 16:9 sem scroll horizontal, câmera no lugar certo por layout, permissão pedida uma vez, animações preenchendo os 2/3, títulos em máx. 2 linhas, editar o `roteiro.md` externo reflete em ~1,5 s, digitar no painel grava no `.md` sem tocar intro/cabeçalhos, Ctrl+S grava e sobrevive ao reload, gravando com Element Capture o overlay some do MP4 e navegar durante a gravação não congela o vídeo. Em `file://`: áreas verdes `#00FF00` puras.
@@ -166,7 +173,7 @@ Setas/espaço navegam · **T** painel do roteiro · **O** overlay de leitura · 
 
 - **Aberto em `file://`:** sem `getUserMedia` e sem sincronização do roteiro; áreas de câmera em verde chroma `#00FF00` puro com aviso fora da área; o deck sobe com os slides embutidos, navegável.
 - **Permissão negada / sem webcam:** mesmo fallback verde; aviso específico.
-- **Tela que não é 16:9 (ultrawide, 16:10):** letterbox `#333` acima e abaixo (ou nas laterais), quadro sempre proporcional, slide seguinte nunca vaza.
+- **Tela que não é 16:9 (ultrawide, 16:10):** letterbox `#000` acima e abaixo (ou nas laterais), quadro sempre proporcional, slide seguinte nunca vaza.
 - **Webcam 16:9 num terço vertical:** `object-fit: cover` corta as sobras, nunca distorce.
 - **Título longo no `thirds`:** `fitTitles` reduz até 2 linhas (mínimo 18px).
 - **Roteiro com mais/menos slides que o HTML embutido:** o `roteiro.md` manda; o mapeamento por ordem de aparição nunca desloca textos.
@@ -192,6 +199,9 @@ Setas/espaço navegam · **T** painel do roteiro · **O** overlay de leitura · 
 
 **Roteiro e teleprompter:**
 - [ ] `roteiro.md` na raiz com a gramática de 4 campos (`layout | Título | animação`) documentada na intro.
+- [ ] Cada `<section>` tem `data-mira-slide-id`, pareado com o `<!-- mira-slide-id -->` do bloco correspondente.
+- [ ] Trocar dois blocos de lugar no `roteiro.md` e recarregar leva palco, título e fala juntos; nenhum palco `<slug>-stage` vira `sv-slide-N`.
+- [ ] O `<!-- mira-slide-id -->` não aparece no painel do teleprompter nem no overlay.
 - [ ] Slides nascem do `.md`; sem o arquivo, o deck sobe com os slides embutidos, sem erro no console.
 - [ ] Builder do roteiro ANTES das animações e dos `<script defer>`.
 - [ ] Editar o `.md` aparece em ~1,5 s; digitar no painel grava com intro e cabeçalhos intactos; poll parado durante gravação e digitação; `.md` apagado é recriado.

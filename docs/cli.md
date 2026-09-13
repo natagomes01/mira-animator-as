@@ -14,7 +14,9 @@ npx mira-animator --version      # print version
 | `install` | Installs Mira in the current folder (agents, templates, config). |
 | `link <path>` | Links a folder or file as a content source. |
 | `sources` | Lists the linked sources. |
-| `edit <deck>` | Installs/updates the **authoring tools** (edit mode E — reorder, free editing, Alt crop — and drawing P) in an existing deck. |
+| `new <name>` | Creates a deck from a template. |
+| `edit <deck>` | Installs/updates the **authoring tools** (edit mode E — reorder, free editing, Alt crop — and drawing P) in an existing deck, and **updates the native recorder** in Studio decks. |
+| `memoria <subcommand>` | Reads and manages the local preference memory. |
 | `status` | Shows the state of the installation and the decks. |
 | `update` | Updates agents and templates to the latest version. |
 | `uninstall` | Removes Mira from the current folder. |
@@ -50,23 +52,25 @@ npx mira-animator sources
 
 Lists every linked source with its alias, type and path.
 
-## Creating a deck (`/mira-new`)
+## `new`
 
-Creating a deck is **not** a CLI command — you do it conversationally in Claude, by talking to the `/mira-new` skill:
+There are two ways to create a deck. From the CLI:
 
-```text
-/mira-new create a new presentation called 'my-talk'
+```bash
+npx mira-animator new my-talk [--deck=<template>] [--theme=<theme>]
 ```
 
-It assembles `decks/<name>/` from a template and registers it. You can spell out the template and theme in the same sentence:
+Or conversationally with `/mira-new`:
 
 ```text
 /mira-new create a presentation called 'my-talk' with the aula-capitulo template and the mira-dark theme
 ```
 
+Both assemble `decks/<name>/`, create `references/`, install edit and drawing tools under `mira/`, copy offline libraries to `assets/vendor/`, and register the deck. The choices are read dynamically from `templates/`; run `npx mira-animator new` with no name to see the installed values.
+
 | Choice | Values |
 |---|---|
-| Template | `mira-default` (default), `aula-capitulo`, `pitch-projeto`, `demo-tecnica`, `sandeco-just-animation-template` |
+| Template | `mira-default` (default), `aula-capitulo`, `pitch-projeto`, `demo-tecnica`, `sandeco-just-animation-template`, `mesa-tatica`, `mira-studio-demo`, `mira-studio-full-demo` |
 | Theme | `mira-dark`, `light-minimal`, `corporate-blue`, `neon-emerald` |
 
 ## `edit`
@@ -75,7 +79,34 @@ It assembles `decks/<name>/` from a template and registers it. You can spell out
 npx mira-animator edit <deck>
 ```
 
-Retrofits the **authoring tools** into a deck that already exists: it copies `mira-edit.js`, `mira-edit-free.js` and `mira-draw.js` into `<deck>/mira/` and injects the scripts before `</body>`. Open the deck and press **E** to edit (reorder slides + free editing: move, resize, rotate, duplicate, delete, edit text and **crop with Alt + handle**, OBS Studio style) or **P** to draw on top, then save. New decks already ship with everything. It is also the **migration** command: run `npx mira-animator edit <deck>` on older decks to upgrade them to the latest tools (including Alt crop). See [Utility agents](agentes/uteis.md) for how the reorder and saving work.
+Retrofits the **authoring tools** into a deck that already exists: it copies `mira-edit.js`, `mira-edit-free.js` and `mira-draw.js` into `<deck>/mira/` and injects the scripts before `</body>`. Open the deck and press **E** to edit (reorder slides + free editing: move, resize, rotate, duplicate, delete, edit text and **crop with Alt + handle**, OBS Studio style) or **P** to draw on top, then save. New decks already ship with everything. It is also the **migration** command: run `npx mira-animator edit <deck>` on older decks to upgrade them to the latest tools (including Alt crop). **It also updates the recorder** (`mira-record.js` / `mira-record-16x9.js`) in Studio decks, which is how the audio and A/V-sync fixes of 0.1.61 reach a deck that already exists — a deck created before that version keeps the old recorder until you run this. See [Utility agents](agentes/uteis.md) for how the reorder and saving work.
+
+## `memoria`
+
+```bash
+npx mira-animator memoria lembrancas [--papel cover] [--formato 16x9] [--tema mira-dark] [--eixo color] [--registro name]
+npx mira-animator memoria nota "less text per slide" --eixo density
+npx mira-animator memoria consolidar [--simular]
+npx mira-animator memoria estado <file.md> <ativo|suspenso|revogado|candidato|observado>
+npx mira-animator memoria listar
+npx mira-animator memoria onde
+```
+
+`lembrancas` selects preferences for the current context; `--registro` records provenance outside the deck. `nota` creates an explicit active instruction. `consolidar` finds recurring corrections and creates candidates; `--simular` writes nothing. `estado` changes a note's lifecycle without deleting it. `listar` shows notes and reinforcement counts; `onde` prints memory and evidence paths. Data lives in `~/.mira-memory/` by default; set `MIRA_MEMORY_DIR` to override it.
+
+## `storyboard`
+
+Concept Storyboard: the cheap draft that validates the idea before it becomes an animation.
+
+```bash
+npx mira-animator storyboard render <deck>/storyboard
+npx mira-animator storyboard render <deck>/storyboard --no-png
+npx mira-animator storyboard verify <deck>
+```
+
+`render` reads every `.json` scene under the folder and writes `.svg` and `.png` next to each one, plus the contact sheet `storyboard/index.html`, which opens over `file://` with no server. Rasterisation uses headless Chrome; without it the SVGs and the sheet are still written and only the PNG is skipped.
+
+`verify` answers one question: did the approved concept reach the slides? It checks the `@MIRA:CONCEPT` markers against `storyboard/approved/`, reports broken references, unmarked slides and scene briefs missing the mandatory section. **It never writes or fixes anything** — fixing is your call. A deck with no `storyboard/concept-brief.md` is simply *not linked*, which is not a defect: it says so in one line and exits 0.
 
 ## `status`
 

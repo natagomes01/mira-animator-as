@@ -10,6 +10,8 @@ MIRA é **Metáforas Inteligentes Responsivas Animadas**. A metáfora não é um
 
 ## REGRA ZERO
 
+**METÁFORA PRIMEIRO. ANIMAÇÃO DEPOIS.** Diante de qualquer conceito, texto, PDF ou pedido de slide, a primeira pergunta é "qual é a melhor maneira visual de fazer alguém compreender esta ideia?", nunca "como animar isso". A pergunta certa não é "que objeto representa esta palavra?", é "que transformação, comportamento ou situação visual permite compreender este conceito?". A animação é consequência da representação escolhida; escolher elementos gráficos primeiro e tentar dar significado depois é o método invertido.
+
 Toda animação DEVE ser **uma metáfora**, DEVE ser **uma história** e DEVE ter **loop interno perpétuo**.
 
 - **Metáfora:** analogia concreta do cotidiano, nunca o diagrama do próprio conceito.
@@ -17,6 +19,33 @@ Toda animação DEVE ser **uma metáfora**, DEVE ser **uma história** e DEVE te
 - **Loop:** entrar com fade-up e parar é proibido. Algo continua em movimento depois da entrada.
 
 Antes de codar você tem que conseguir dizer as três frases. Ex.: *"débito técnico é uma torre que ganha um bloco sozinha"*, *"ela inclina até alguém tirar um bloco"*, *"a cada ciclo entra um bloco novo"*.
+
+## Se o deck tem conceito alinhado, ele é REFERÊNCIA
+
+Alguns decks têm uma pasta `storyboard/` com `concept-brief.md` e quadros em `approved/`. Ela nasce
+quando o autor **pede explicitamente** o `/mira-concept-align` e o `/mira-storyboard`, porque a ideia
+estava confusa e ele quis clarear antes de produzir. É fluxo alternativo, não o caminho normal.
+
+**Deck sem essa pasta: nada muda. Comportamento de hoje, byte por byte.** É a maioria dos decks.
+
+Existindo a pasta, uma obrigação só:
+
+**Leia o `storyboard/concept-brief.md` antes de escrever a animação, e não contrarie o que está
+lá.** A metáfora, os elementos obrigatórios e as interpretações proibidas já foram decididos pelo
+autor; você implementa, não reinventa. É material de consulta, do mesmo jeito que `references/`.
+
+Enxergando necessidade de contradizer (a metáfora aprovada não funciona visualmente, um elemento
+obrigatório não cabe): **argumente ao autor**, citando a seção do brief. Não decida sozinho, e não
+obedeça cegamente. A autoridade sobre o significado é dele.
+
+Opcionalmente, e só se ajudar, declare qual quadro o slide realiza:
+
+```html
+<!-- @MIRA:CONCEPT quadro="approved/slide-03.svg" intent="a distância para a fonte original aumenta" -->
+```
+
+O marcador **não é obrigatório**. Ele serve ao `npx mira-animator storyboard verify <deck>`, que o
+autor roda quando quiser conferir se a referência chegou nos slides. Nada trava sem ele.
 
 ## Método obrigatório: A/B, portões, escolha
 
@@ -59,6 +88,15 @@ Escopo de um slide só: rode o método normal. Escopo do deck todo (caso comum d
 
 Reprovou na passada 2? Use a candidata perdedora do A/B daquele slide, se for de família livre, ou gere uma substituta dentro da família atribuída. O quadro segue válido; só reapresente se a própria família mudar. **Acima de 4 slides, apresente o quadro ao usuário antes de codar**: vetar ali é barato, depois de implementado é caro.
 
+## Refinamento sob demanda
+
+A primeira entrega é sempre a geração normal: A/B, portões, uma metáfora boa por slide, sem exploração extra. A exploração pesada só existe **depois**, quando o usuário vê o resultado e pede refinamento ("outra metáfora", "menos óbvia", "mais impacto", "simplifica", "troca a ideia").
+
+- **Escopo por slide.** Refinar o slide 6 não regenera os outros. Slide aprovado fica intacto, e o quadro de metáforas do deck segue válido para ele.
+- **Trava de exploração liberada, só aqui.** No refinamento vale gerar várias candidatas de famílias diferentes, comparar nos portões e buscar mais originalidade ou outra narrativa visual. O limite "A/B e só" é da primeira geração, não do refinamento.
+- **Ledger e rubrica continuam valendo.** A metáfora nova não pode colidir com os vizinhos aprovados, e o corte segue 85 sem veto.
+- **Rejeição troca a analogia**, nunca pole a animação (regra do método: descarte a família e traga outra).
+
 ## Ledger de diversidade
 
 Antes de aprovar, anote de cada slide animado do **mesmo deck**: sistema do cotidiano, família de domínio, verbo causal, silhueta dominante, organização espacial, movimento principal e assinatura temporal. Assinaturas possíveis: acumulação com colapso, rajada com pausa, fluxo interrompido, alternância, onda em cascata, perseguição, compressão e liberação.
@@ -69,18 +107,44 @@ Repetição só vale como motivo narrativo pedido pelo usuário, e aí varia mec
 
 ## Direção de movimento
 
-Antes de codar, escreva uma **beat sheet de 5 a 7 momentos** com acontecimento, ator focal, duração, easing ou física, estado resultante. O ciclo costuma durar de 4,5 a 8 segundos.
+### Temperamento, escolha antes da beat sheet
+
+O temperamento decide quantos beats cabem e que easing vale, então ele vem primeiro. **`sereno` é o padrão. `tenso` só entra quando o usuário pede tensão na cena** (uma torre desabando, um alarme). Pedido implícito não conta.
+
+| | `sereno` (padrão) | `natural` | `tenso` |
+|---|---|---|---|
+| Ciclo do loop | 9 a 14 s | 7 a 10 s | 4,5 a 7 s |
+| Beats | 4 a 5 | 5 a 6 | 6 a 7 |
+| Janela mínima entre eventos focais | 1200 ms | 800 ms | 500 ms |
+| Repouso antes de reiniciar | 1,2 a 2,0 s | 0,8 a 1,2 s | 0,4 a 0,7 s |
+| Atraso causa e efeito | 250 a 500 ms | 150 a 350 ms | 120 a 250 ms |
+| Famílias de easing | `sine`, `power1`, `power2` | `power2`, `power3` | `power4`, `expo`, `back` |
+| Atores em movimento simultâneo | 1 focal, 1 ambiente | 1 focal, 2 apoios | livre |
+| Duração de cue de câmera | 1,5 a 2,5 s | 1,0 a 1,8 s | 0,3 a 0,8 s |
+| Cues de câmera por cena | no máximo 2 | no máximo 3 | livre |
+
+As duas últimas linhas só valem em cena com câmera. Sem câmera, são inertes, não impedimento.
+
+**Regra do repouso.** Todo ciclo contém pelo menos **um trecho de 1 segundo em que nada focal se move**. Só ambiente. É a respiração da cena, e é o que separa uma animação de um letreiro luminoso. Some as durações mais o repouso: se não sobrar janela contínua de 1000 ms sem evento focal, tire um beat ou estenda o repouso. Nunca encurte a janela.
+
+**O ciclo longo é deliberado.** O slide é visto enquanto alguém fala por cima dele. Ciclo longo não cansa, ciclo curto sim. Se 4 beats parecerem pouco para 9 segundos, aumente a duração de cada beat ou resolva o estado vivo por deriva lenta; não acrescente beat.
+
+Declare o temperamento na primeira linha da beat sheet: `Temperamento: sereno · ciclo 11 s · 4 beats · repouso 1,6 s`.
+
+### Beat sheet
+
+Antes de codar, escreva uma **beat sheet** com acontecimento, ator focal, duração, easing ou física, estado resultante. O número de beats e a duração do ciclo saem da tabela do temperamento escolhido.
 
 1. **Uma ação por vez.** Em qualquer janela de 500 ms, no máximo um acontecimento focal. O resto apoia.
-2. **Causa antes do efeito.** O efeito começa 120 a 400 ms depois da causa. Mesmo frame vira decoração sincronizada.
+2. **Causa antes do efeito.** O efeito começa depois da causa, no atraso da linha "atraso causa e efeito" do temperamento. Mesmo frame vira decoração sincronizada.
 3. **Antecipação.** Preparação curta antes da ação (recuo, compressão, inclinação, pausa), 8% a 15% do tempo dela.
 4. **Peso.** Pesado acelera devagar, arco menor, quase sem overshoot. Leve acelera rápido, admite overshoot e follow-through maior.
-5. **Easing semântico.** Fluxo uniforme linear; queda ease-in; chegada e dissipação ease-out; orgânico sine-in-out; elástico só em objeto leve. Nunca o mesmo easing em tudo.
+5. **Easing semântico.** Fluxo uniforme linear; queda ease-in; chegada e dissipação ease-out; orgânico sine-in-out. **Deslocamento de objeto (ator viajando de A a B) usa por padrão o perfil explode-assenta**: `miraMotionBlur.explodeAssenta(h, k)` do `mira/mira-motion-blur.js` (instale o helper se o deck não tiver), explosão em velocidade máxima até a metade do tempo e chegada em cauda longa, rastejando. Em `sereno`, alongue a janela do deslocamento em vez de trocar a curva; pedido do autor veta ou troca. Nunca o mesmo easing em tudo, e sempre dentro da família do temperamento. **`back`, `elastic` e `bounce` ficam fora do padrão**, liberados só em `tenso` ou quando a física da metáfora os exigir (uma mola é uma mola, e a beat sheet declara o motivo). São as curvas que produzem overshoot visível, e overshoot repetido faz a cena parecer agitada mesmo quando é lenta.
 6. **Hierarquia.** Um ator primário e no máximo dois movimentos secundários. Durante a ação principal o ambiente perde contraste, amplitude e velocidade.
-7. **Leitura da consequência.** Segure o estado resultante 400 a 900 ms antes de reiniciar.
+7. **Leitura da consequência.** Segure o estado resultante antes de reiniciar, pelo tempo da linha "repouso" do temperamento.
 8. **Follow-through.** Depois de impacto ou parada, partes flexíveis e rastros continuam 150 a 500 ms.
 9. **Arcos.** Objeto transportado, lançado ou articulado não anda em reta sem justificativa mecânica.
-10. **Loop invisível.** Reinicie na saída de quadro, oclusão, retorno natural ou troca de ciclo. Nunca teletransporte o estado inteiro na cara do espectador.
+10. **Loop invisível.** Reinicie na saída de quadro, oclusão, retorno natural ou troca de ciclo. Nunca teletransporte o estado inteiro na cara do espectador. Em `sereno`, a forma preferida do estado vivo é **deriva lenta contínua**: algo que respira, oscila devagar ou avança de forma quase imperceptível, em vez de repetir visivelmente o gesto focal. Ação focal repetindo a cada 5 segundos é o que mais cansa numa apresentação longa.
 
 Movimento ambiente não é narrativa. Se a beat sheet puder ser trocada por "tudo pulsa", volte à metáfora.
 
@@ -98,6 +162,8 @@ Pontue com uma evidência concreta por linha. Polimento não compensa causalidad
 | **Diversidade.** Passa no ledger e contrasta com os vizinhos. | 10 | Repete domínio, silhueta, composição e movimento. |
 
 **Corte: 85 de 100 e nenhum veto.** Abaixo disso, volte ao A/B ou à beat sheet. Não entregue "o que deu para fazer".
+
+**A nota é avaliada com o cinema desligado.** Câmera, luz, grade de cor e atmosfera entram depois de a cena passar, nunca para fazê-la passar. Se ao desligar os quatro a animação deixa de contar a história, a história não existia.
 
 **A nota é sobre o plano**, antes de codar. Não invente que assistiu à animação: a conferência no navegador é do usuário. Ao entregar, diga o que ele deve olhar (a história aparece com o título escondido? o corte do loop aparece? o Replay deixa dois atores correndo juntos?).
 
@@ -122,6 +188,18 @@ Hub-and-spoke, staircase com um ator subindo, duas colunas em confronto com cent
 
 **Não existe mapa conceito para formato.** Se pensou "isso é comparação, então battle arena", parou no atalho: volte à beat sheet e pergunte que geometria a HISTÓRIA exige. Se outra metáfora qualquer pudesse ocupar a mesma composição com os mesmos tempos, refaça. Pulso em uníssono, órbita e partícula genérica ficam fora desta lista de propósito, viraram muleta. E nada de "8 cards retangulares enfileirados" (o usuário já reclamou).
 
+## Motion blur (efeito de velocidade)
+
+Efeito **opcional** para DISPAROS: um ator que estava parado cruza o quadro rápido. **Nunca é padrão**: slide sem disparo não recebe nada, e "sem motion blur" no pedido do autor veta o efeito. Dose: o rastro é o corpo do efeito e cabe em qualquer disparo; o blur é acabamento e só aparece no pico da velocidade.
+
+Helper: `mira/mira-motion-blur.js` (copie de `templates/authoring/` ou de `mira-templates/authoring/` se o deck não tiver), com a tag logo após o d3: `<script src="mira/mira-motion-blur.js"></script>`. A API está documentada no cabeçalho do próprio arquivo. Três regras que não se negociam:
+
+- **Força = velocidade normalizada** (`miraMotionBlur.forca(vel, pico)`), com `vel` por diferença central da função do movimento. Parado, tudo desliga sozinho e o repouso fica limpo.
+- **Rastro analítico** (`.eco()`): o fantasma k é a posição de onde o ator estava há `k*passo` ms, tirada da própria função do movimento. Nunca guarde histórico de posições: o regente congela e zera o relógio, e histórico vira lixo na tela.
+- **Blur direcional**: movimento reto usa `.filtro()` aplicado no grupo rastro + ator, o conjunto borra num risco contínuo. Trajetória curva usa `.ator()`, que gira o blur para o ângulo do voo, com o rastro fora do rig, nítido.
+
+O perfil de velocidade padrão do disparo é o **explode-assenta** (`miraMotionBlur.explodeAssenta()`, regra 5 da beat sheet): normalize a força com o `.pico` anexado à função (`picoMs = ease.pico / duraçãoMs do disparo`).
+
 ## Ícone flat como ator, não bolinha
 
 O círculo (dot, partícula, satélite, anel, pulso radial) é legítimo só para o **genuinamente abstrato**: fluxo, energia, sinal, conexão, propagação. Para o resto, empobrece.
@@ -136,6 +214,16 @@ O círculo (dot, partícula, satélite, anel, pulso radial) é legítimo só par
 - **Fonte aberta apenas**, licenças MIT, Apache-2.0, CC0 ou CC-BY: Google Material Symbols (eixo *fill*) ou API do Iconify. Prefira path único, viewBox `0 0 24 24`. Embuta inline, o deck roda offline por `file://`. Atribuição no `CREDITS.md` se a licença pedir; recuse IP protegida e sugira arte original.
 - Slide inteiro de morph de ícones já é o `/mira-icon-morph`.
 
+### Proibido desenhar à mão
+
+Ícone flat resolve objeto. Não resolve o que tem anatomia. Estes referentes **nunca** viram `path`
+escrito por você: **figura humana** (inteira ou parte), **mão, braço, perna**, **rosto ou feição**,
+**animal**, **veículo**, **anatomia articulada**, **objeto de uso cheio de detalhe**. Sai trapézio
+com bola em cima, e já saiu.
+
+Caiu na lista, chame o **`/mira-asset-scout`**: ele acha o SVG em fonte aberta e o embute inline, ou
+pede o arquivo ao autor com plano B. Só volte a desenhar quando ele devolver DESENHAR.
+
 ## Texto e título
 
 - **Idioma:** siga `agents/_shared/idioma.md`. Português brasileiro, acentuação correta, UTF-8 direto, `<meta charset="UTF-8">`. Nunca Unicode escapes (`é`) nem entidades (`&eacute;`).
@@ -144,6 +232,7 @@ O círculo (dot, partícula, satélite, anel, pulso radial) é legítimo só par
 - **No máximo 6 palavras no título**, salvo pedido explícito.
 - **Título colado no topo:** `<section>` com `px-6 pt-3 pb-6`, wrapper sem `pt-10`, bloco do título fechando com `mb-2`.
 - **Capa com quebra equilibrada (diretiva):** segue `agents/_shared/titulo-capa.md`, `text-wrap: balance` escopado só à capa (`body > section:first-of-type h1, body > section:first-of-type h2`). Só a capa, slides de conteúdo não precisam.
+- **O palco ocupa o quadro inteiro e o título flutua por cima dele** (`mira-default`). O `palco()` mede o título e devolve a faixa livre: `F.topo`, `F.alturaUtil` e `F.vy(k)`. **Use `F.vy(k)` no lugar de `F.H * k`** para toda coordenada vertical: `F.H * .24` vira `F.vy(.24)`. Nada FOCAL acima de `F.topo`. Movimento de ambiente pode atravessar, porque atrás do título ele lê como profundidade, não como conflito.
 
 ## Variante: sandeco-just-animation-template (animação pura)
 
@@ -172,11 +261,107 @@ Estrutura de um slide de conteúdo (é o contrato, não sugestão):
 
 Capa e encerramento trocam `.slide-main` por `.slide-centro` (texto centrado, sem palco).
 
-- **O palco é o slide inteiro menos o título.** `.anim-stage` é `flex: 1 1 auto`, não uma caixa de altura fixa. Case o `viewBox` com a caixa real (`getBoundingClientRect`) em vez de fixar `0 0 1280 720`, senão o desenho estica quando a altura do slide muda.
-- **Componha no centro do palco**, não abaixo dele: aqui não há header sobreposto para desviar.
-- **Os 50px de padding do `.slide-main` são área segura.** Nada encosta na borda do quadro.
+- **O palco é o QUADRO INTEIRO.** `.anim-stage` é `position: absolute; inset: 0` e cobre a `<section>` de borda a borda, por baixo do título. Não é mais "o que sobra depois do título". Case o `viewBox` com a caixa real (`getBoundingClientRect`) em vez de fixar `0 0 1280 720`, senão o desenho estica quando a altura do slide muda.
+- **O título flutua por cima, e a animação desvia dele.** O `palco()` mede o título e devolve a faixa livre: `F.topo`, `F.alturaUtil` e `F.vy(k)`. **Use `F.vy(k)` no lugar de `F.H * k`** em toda coordenada vertical. Nada FOCAL acima de `F.topo`; ambiente pode atravessar, porque atrás do título lê como profundidade, não como conflito.
+- **Componha para preencher o quadro, e a régua é dura:** a cena ocupa a faixa livre inteira (`F.alturaUtil`), não uma tira no rodapé. Faixa vazia entre o título e a animação é defeito de composição, não estilo. Dimensione os atores pela altura útil e preencha o que sobrar com cenário e ambiente da própria metáfora (o lugar onde a cena acontece: parede, luz, fumaça, prateleira), nunca com enfeite aleatório. Cenário é ambiente, não foco: entra parado ou em deriva lenta e não disputa com a ação.
+- **Os 50px de padding do `.slide-main` são área segura das bordas.** Nada essencial encosta na borda.
 - **UMA cor de marca dominante**, lida de `--mira-primary` / `--mira-accent-2`. Sem arco-íris.
-- **Sem camada cinematográfica.** Este template não tem brasas nem vinheta; o fundo é preto limpo. Quem quer o clima de gravação usa `/mira-studio-full`.
+- **Camada cinematográfica: só se o deck pediu.** Ver a seção abaixo.
+
+## Modo cinema: câmera, profundidade e grade
+
+**Só existe se o deck tiver `mira/mira-cinema.js`.** Confira o arquivo antes de escrever uma linha de câmera. Se não estiver lá, escreva a animação sem câmera, sem planos e sem grade, e diga isso na entrega. Nunca chame API que o deck não carrega.
+
+O deck nasce com cinema quando é criado com `npx mira-animator new <nome> --cinema`, que instala o módulo e o GSAP e injeta as tags na ordem certa.
+
+**O princípio:** o GSAP não anima elementos, anima ESTADOS, e os renderizadores derivam. Existem duas fontes únicas de verdade por palco, `cena.camera` e `cena.luz`. Você nunca escreve o `viewBox` na mão.
+
+```js
+const cena = MiraCinema.palco('slug-svg', { grade: 'noite-fria', seed: 41721 });
+
+Prof.plano(cena, '#g-fundo',  { z: 0.85, desfoque: 2.5, escurecer: 0.35 });
+Prof.plano(cena, '#g-meio',   { z: 0.45 });
+Prof.plano(cena, '#g-frente', { z: 0.10 });
+```
+
+**A câmera NÃO se escreve em JS. Ela se escreve como marcador, dentro da `<section>`:**
+
+```html
+<section>
+  <!-- razões: 1 foco na decisão do ator; 2 o impacto é o acontecimento da cena -->
+  <!-- @MIRA:CICLO 12.0 BEATS 12 -->
+  <!-- @MIRA:LOOP on -->
+  <!-- @MIRA:VOLTA on -->
+  <!-- @MIRA:FOCO 1 tipo=aproximar cx=480 cy=300 r=180 beat=2.0 dur=2.2 -->
+  <!-- @MIRA:FOCO 2 tipo=tremor amp=0.01000 beat=8.8 dur=0.3 -->
+  ...
+</section>
+```
+
+O `mira/mira-foco.js` lê esses marcadores no load e monta a câmera dentro da `cena.tl`, chamando os
+`Cam.*` por você. É o mesmo motor, com uma diferença que decide tudo: **a tecla C só enxerga
+marcador**. Cue chamado inline via `cena.tl.add(Cam.aproximar(...))` roda, mas não aparece na
+timeline do modo câmera, e o autor não consegue ajustar o que não vê. Foi o defeito medido no deck
+de 2026-08-07: 27 cues em JS, 1 marcador, câmera ineditável. Por isso o contrato:
+
+- **Todo cue de câmera nasce como `@MIRA:FOCO`.** Zoom é `tipo=aproximar cx= cy= r=`; travelling é
+  `tipo=revelar cx= cy= r=`; pontuação é `tipo=tremor amp=`; estado é `tipo=tensao amp=`, com
+  `loop=1` quando sustenta o ciclo. `beat` e `dur` aceitam fração.
+- **Declare `@MIRA:CICLO <segundos> BEATS <n>` com `n` = segundos arredondado**, para 1 beat valer
+  cerca de 1 segundo e o marcador ser legível por gente.
+- **`@MIRA:VOLTA on` cobre o estabelecer no beat 0 e o recuar no fim.** Não escreva esses dois como
+  foco. `Cam.segurar` é ausência de cue. Estabelecer no meio da cena é um foco de quadro cheio:
+  `cx=W/2 cy=H/2 r=H/2`.
+- **O elemento que a câmera enquadra tem posição FIXA no código, não sorteada.** Marcador guarda
+  coordenada absoluta; coordenada que vem da semente não cabe num comentário. Visualmente dá no
+  mesmo: o que importa é enquadrar UM prédio, não o prédio sorteado.
+- **A razão de cada cue vai num comentário comum ao lado dos marcadores** (e no Motion Score, se
+  houver). O campo do marcador só carrega número, e razão continua obrigatória: cue sem razão é
+  câmera decorativa.
+- **`Cam.*` inline só quando o efeito não existe no vocabulário do marcador** (um punch-in composto,
+  um Vertigo), e aí com comentário no código dizendo por que não pôde ser marcador. É exceção
+  justificada, não caminho paralelo.
+
+| Peça | O que faz |
+|---|---|
+| `MiraCinema.palco(id, opts)` | cria a cena, casa o `viewBox`, dá uma timeline GSAP por palco, toca ao entrar em tela e congela ao sair. Substitui `palco()` + `reger()` |
+| `Cam.estabelecer`, `aproximar`, `revelar`, `recuar`, `segurar`, `tremor`, `tensao` | os sete cues do motor. Quem os chama é o `mira-foco.js`, a partir dos marcadores; chamada direta na timeline é só a exceção justificada acima |
+| `Cam.tremor(cena, {dur, amplitude, razao})` | impacto: ataque seco, cabeça curta em força cheia, queda. Escreve em `cena.abalo` |
+| `Cam.tensao(cena, {dur, amplitude, razao})` | a mesma vibração do tremor, fraca, plana e longa. Escreve em `cena.tensao` |
+| `Prof.plano(cena, seletor, {z, desfoque, escurecer})` | profundidade; `z` de 0 (colado) a 1 (infinito), parallax = `1 - z` |
+| `Prof.foco(cena, {plano, dur})` | foco seletivo; é o ÚNICO lugar onde desfoque anima |
+| `Grade.aplicar(cena, preset)` | `neutra`, `noite-fria`, `brasa`, `clinica`, `penumbra` |
+| `cena.rnd()` | PRNG semeado. **Nunca use `Math.random()`** |
+| `cena.aoAtualizar(fn)` | o tique livre: roda todo quadro, **independente da timeline**. Único canal para derivar câmera, luz e atmosfera |
+
+**Tetos, e são números, não bom senso:**
+
+- **`razao` é obrigatória** em `aproximar`, `revelar`, `recuar`, `tremor` e `tensao`. Cue sem razão é câmera decorativa.
+- **Cues por cena:** no máximo 2 em `sereno`, 3 em `natural`, livre em `tenso`.
+- **Planos:** de 3 a 5, nunca mais. Raio de desfoque no máximo 4.
+- **`tremor`:** 400 ms é conselho, não corte. O motor honra até 1,2 s e avisa no console acima de 400 ms. Num slide gravado, tremor longo lê como falha de captura, não como intenção.
+- **`tremor` contra `tensao`:** mesma vibração, papéis opostos. Tremor é **pontuação**, um instante, amplitude até 0,03. Tensão é **estado**, sustenta o tempo que a cena pedir, amplitude até 0,008. Tensão forte e curta vira tremor mal feito; tremor longo vira motor ligado.
+- **Os cues coexistem, e é assim que efeito novo nasce.** `camera`, `abalo`, `tensao` e os planos são canais separados que o tique soma. Tensão sustentada com um tremor por cima durante um zoom é uma frase legítima, não conflito. O que conflita é dois cues do **mesmo** canal no mesmo intervalo. Se a direção pedir um efeito que não tem cue com esse nome (punch in, trovão, Vertigo), monte com os canais em vez de recusar: a lista de cues é o vocabulário, não a lista de efeitos possíveis.
+- **Filtro de tela cheia animado é proibido.** Vinheta, grão e grade são estáticos.
+
+**DOIS RELÓGIOS POR CENA. Partícula não anda no relógio da história.**
+
+A timeline da cena obedece ao `@MIRA:LOOP` e à tecla L, então ela **para** num slide que fecha no último quadro. Poeira, fumaça, brasa e faísca não são a história: são o mundo continuando a existir. Presas à timeline, morrem junto e o último quadro vira foto.
+
+- **História:** o callback de quadro na `cena.tl`. Move os atores, a luz, o texto. E **anota** o estado que a atmosfera precisa ler (onde a luz está, quanta intensidade).
+- **Atmosfera:** `cena.aoAtualizar(fn)`, com relógio próprio acumulado. Move as partículas lendo a última anotação. Nunca para, exceto com o slide fora de tela ou o modo edição ligado.
+
+Acumule o tempo da atmosfera, não leia o relógio de parede: ela pausa em três situações (edição, slide fora de tela, aba em segundo plano) e ler o relógio direto faria o ar saltar o buraco inteiro num quadro só ao voltar. Teto de 0,1 s por quadro resolve.
+
+**Oclusão é doutrina, não API.** Resolva por ordem de empilhamento no SVG e máscara, e planeje pelo menos uma passagem atrás de alguma coisa: parallax sem oclusão continua lendo como recorte deslizante.
+
+**Marque o que não pode engordar no zoom:** `data-mira-traco-fixo` no traço e `data-mira-texto-fixo` no texto. Sem isso, todo push-in engorda a arte, e o sintoma não sugere a causa.
+
+**A trava que vale acima de tudo:** nenhum recurso de cinema pode ser a única mudança de estado da cena. **A nota de corte é avaliada com o cinema desligado.** Ele entra depois de a cena passar, nunca para fazê-la passar.
+
+> **Existe um irmão para o caso contrário.** Quando o autor pedir explicitamente uma cena em que o cinema **é** a cena, a skill é a `/mira-cine-animator`. Ela herda este método inteiro por referência e inverte exatamente estas duas travas, e só elas. Aqui, a trava continua valendo sem exceção: não afrouxe por conta própria porque a cena ficaria bonita. Se o caso for esse, diga ao autor que existe o irmão e deixe a escolha com ele.
+
+**Recurso novo que chegar aqui vale no irmão também, quando for viável.** A `/mira-cine-animator` não copia este arquivo, ela aponta para ele, então a herança é automática e não há nada a sincronizar. O que exige decisão humana é só o recurso que colidir com as duas inversões, e a exceção se registra lá.
 
 > **Atenção ao tamanho.** O palco aqui é bem maior que o palco dentro de um card do `aula-capitulo`. Uma composição calibrada em 3/10 para card fica pequena e perdida aqui. Componha para preencher, e trate o `@MIRA:SIZE` deste template como escala própria (ver `/mira-size-animator`).
 
@@ -284,13 +469,13 @@ A cena já foi decidida na beat sheet. Aqui você só escolhe com que stack dese
 2. **Entender o conceito** do alvo (título, subtítulo, texto, pílulas, intenção da animação atual). Se o conceito vier no comando, use esse texto. Se útil, consulte `decks/<tema>/references/`.
 3. **Rodar o método:** frase causal, A/B de famílias diferentes, mapeamento, contrafactual, especificidade, distância, história, loop. **Deck inteiro usa a regra de lote.**
 4. **Ledger de diversidade** contra os outros slides animados do deck.
-5. **Beat sheet** de 5 a 7 momentos, antes de qualquer código.
+5. **Temperamento e beat sheet**, antes de qualquer código. `sereno` por padrão.
 6. **Rubrica.** Abaixo de 85 ou com veto, volte ao passo 3.
 7. **Coreografia** derivada da beat sheet, nunca de um formato pronto.
 8. **Esqueleto de `mira-templates/decks/`** como referência estrutural, CSS do stage no `<style>` e HTML do card dentro do `<main>` (modo CRIAR), ou localizar o stage e reescrever só a função (modo SUBSTITUIR).
 9. **Função JS** com reset (clearInterval + `selectAll('*').remove()`), geração anti-vazamento, entrada coreografada com stagger e loop interno contínuo.
 10. **Trigger** registrado em `setupAnimationTriggers()`, ou conferido se já existia.
-11. **Reportar** slide a slide: `conceito → metáfora (loop em uma frase)`, mais a assinatura do ledger.
+11. **Reportar** slide a slide: `conceito → metáfora (loop em uma frase)`, mais a assinatura do ledger. Refinamento depois da entrega é por slide (seção "Refinamento sob demanda").
 
 Você implementa direto, sem pedir aprovação prévia, quando o usuário já deu contexto suficiente. A exceção é o quadro de metáforas acima de 4 slides.
 
@@ -314,15 +499,18 @@ Nenhum item é opcional. Item não marcado é trabalho não terminado, não deta
 
 **Movimento**
 
-- [ ] Beat sheet de 5 a 7 momentos escrita antes do código.
+- [ ] Temperamento declarado na primeira linha da beat sheet, `sereno` salvo pedido de tensão.
+- [ ] Beat sheet escrita antes do código, com o número de beats do temperamento.
+- [ ] Pelo menos uma janela contínua de 1 s sem evento focal no ciclo.
 - [ ] Uma ação focal por vez, ambiente recuando durante ela.
-- [ ] Efeito 120 a 400 ms depois da causa, nunca no mesmo frame.
+- [ ] Efeito depois da causa no atraso do temperamento, nunca no mesmo frame.
 - [ ] Antecipação de 8% a 15% na ação principal.
-- [ ] Easing semântico e peso coerente, sem bounce em objeto pesado nem easing único em tudo.
-- [ ] Consequência sustentada 400 a 900 ms antes do reinício.
+- [ ] Easing dentro da família do temperamento, sem `back`, `elastic` nem `bounce` fora de `tenso` ou de física declarada.
+- [ ] Consequência sustentada pelo repouso do temperamento antes do reinício.
 - [ ] Corte do loop escondido, sem teletransporte de estado.
 - [ ] Coreografia derivada da história, não escolhida de um menu.
 - [ ] Referente concreto animado como ícone flat, não bolinha genérica; atribuição no `CREDITS.md` se preciso.
+- [ ] Nenhum referente da lista proibida (pessoa, mão, rosto, animal, veículo, anatomia) desenhado à mão; os que apareceram passaram pelo `/mira-asset-scout`.
 
 **Execução**
 

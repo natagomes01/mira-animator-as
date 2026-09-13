@@ -20,7 +20,11 @@ Creating a deck is conversational — just talk to `/mira-new` inside Claude:
 /mira-new create a new presentation called 'my-talk'
 ```
 
-It asks for the theme name, the deck template, the base theme, the primary color and any references, then assembles the `decks/<theme>/` folder and offers to trigger the pipeline. You can also spell out the template and theme up front:
+It asks for **the theme name only**, then immediately creates the `decks/<theme>/` folder with `references/` ready and shows you its full path. There it stops and asks how you want to start: tell it in chat what the presentation is about, or drop your files (PDF, document, screenshots, links) into the references folder and say when you are done. Only after that does it ask for the rest (deck template, base theme, primary color), assemble the deck and offer to trigger the pipeline.
+
+The folder comes first for a practical reason: if you already have the material in hand, you need somewhere to put it before deciding on a template and a color. Come back later, in the same session or a different one, and `/mira-new` recognizes the folder as a deck in progress, lists what it found in `references/` and picks up where you left off.
+
+You can also spell out the template and theme up front:
 
 ```text
 /mira-new create a presentation called 'my-talk' with the aula-capitulo template and the mira-dark theme
@@ -34,9 +38,20 @@ It asks for the theme name, the deck template, the base theme, the primary color
 | `aula-capitulo` | A class or lecture from a chapter / module |
 | `pitch-projeto` | A project pitch |
 | `demo-tecnica` | A technical demo / walkthrough |
-| `sandeco-just-animation-template` | A black stage with no text, only the Mira animation |
+| `sandeco-just-animation-template` | A black stage with no text, only the Mira animation |
 
 **Themes:** `mira-dark`, `light-minimal`, `corporate-blue`, `neon-emerald`.
+
+### Shortcut: the whole deck in one go
+
+If you would rather not go through steps 2 and 3 separately, [`/mira-fast`](agentes/core.md#mira-fast) does everything in a single call, generating the slides in parallel:
+
+```text
+/mira-fast spec driven development
+/mira-fast /mira-vertical the book in references/my-book.pdf
+```
+
+It asks nothing, from topic to final HTML, which also means you do not get to approve the slide plan along the way. It creates the deck folder with `references/` before planning, and fails with a message if you point it at a source that does not exist. Requires **Dynamic workflows** enabled in `/config`.
 
 ## 3. Fill the deck
 
@@ -64,7 +79,7 @@ Once the deck is built, you can shape the motion:
 - **Size** — *"put the animations at 6/10"* or *"this slide is too small, make it 7/10"*. The `mira-size-animator` agent scales the perceived size of each animation on a 1–10 scale (the default that `mira-animator` produces is 3/10).
 - **Metaphor** — *"turn this concept into an animated metaphor"*. `mira-animator` itself replaces a slide's animation with another concrete everyday analogy, in place, keeping the title and pills.
 - **Visuals** — ask `mira-visuals` for static panels, diagrams or infographics, or `mira-chart` for data charts from a CSV/JSON, an image, or even a hand-drawn sketch, or `mira-chart-race` to make temporal data race over time (bars reordering by rank or lines drawing in).
-- **3D, QR, quizzes & images:** drop a real, auto-rotating 3D element with `/mira-3d`, a scannable QR code (from a link or text) with `/mira-qrcode`, a live quiz with presenter-controlled correct-answer reveal using `/mira-quiz`, or an image you already have with `/mira-image`. A 3D slide that loads a `.glb` needs a local server (the agent starts one and writes a double-click launcher); everything else opens from `file://`.
+- **3D, QR, quizzes & images:** drop a real, auto-rotating 3D element with `/mira-3d`, a scannable QR code (from a link or text) with `/mira-qrcode`, a live quiz with presenter-controlled correct-answer reveal using `/mira-quiz`, a live post-it wall of free-text answers with `/mira-post-it`, or an image you already have with `/mira-image`. A 3D slide that loads a `.glb` needs a local server (the agent starts one and writes a double-click launcher); everything else opens from `file://`.
 - **Shape morphing:** make one SVG shape morph into another in a loop with `/mira-svg-morph` (you pass the files), or `/mira-icon-morph` to do it from concepts in words, with icons sourced and licensed from Iconify.
 - **Animate an SVG:** make an SVG you provide move (flap, spin, slide, pulse, draw) with `/mira-svg-animator`; if it is a single merged path, it splits the part to animate.
 

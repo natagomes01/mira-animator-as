@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bugs · mira-fast</title>
+<style>
+  :root{--bg:#0e0f13;--panel:#16181f;--line:#262a35;--ink:#e8e9ee;--muted:#9aa0ae;
+        --red:#e05260;--yellow:#e0b152;--green:#4fbf8b;--blue:#5aa9e6;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.6 ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:32px 20px 64px}
+  h1{font-size:26px;margin:0 0 6px}
+  h2{font-size:19px;margin:36px 0 10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+  .meta{color:var(--muted);font-size:13px;margin:0 0 22px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:20px 0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .card .n{font-size:22px;font-weight:650}
+  .card .k{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-top:6px}
+  .card.green .n{color:var(--green)}.card.red .n{color:var(--red)}.card.yellow .n{color:var(--yellow)}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;display:block;overflow-x:auto}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+  a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+  code{background:#1b1e27;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:12.5px}
+  .pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11.5px;font-weight:600;border:1px solid}
+  .critical{color:var(--red);border-color:var(--red)}
+  .high{color:var(--yellow);border-color:var(--yellow)}
+  .medium{color:var(--blue);border-color:var(--blue)}
+  .active{color:var(--green);border-color:var(--green)}
+  .open{color:var(--muted);border-color:var(--muted)}
+  p.prose{color:#c9cdd8;max-width:82ch}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Bugs · mira-fast</h1>
+<p class="meta">gerado por <code>/reversa-debugger-graph</code> em 2026-08-01T06:00:00Z · 7 bug(s) · closure policy <code>package</code></p>
+
+<div class="cards">
+  <div class="card"><div class="n">7</div><div class="k">total</div></div>
+  <div class="card green"><div class="n">7</div><div class="k">corrigidos, aguardando entrega</div></div>
+  <div class="card red"><div class="n">0</div><div class="k">abertos</div></div>
+  <div class="card yellow"><div class="n">0</div><div class="k">travados com DONE.md</div></div>
+</div>
+
+<h2>Bugs</h2>
+<table>
+<thead><tr><th>#</th><th>ID</th><th>sev</th><th>estado</th><th>título</th><th>causa raiz</th><th>testes</th><th>veredito</th></tr></thead>
+<tbody>
+<tr>
+  <td>4</td>
+  <td><a href="../bugs/BUG-20260731-K4NR-validador-section-em-comentario/bug.md">K4NR</a></td>
+  <td><span class="pill high">high</span> P1</td>
+  <td><span class="pill active">active</span> delivering</td>
+  <td>validateSkeleton reprova o esqueleto por section citado em comentário de documentação</td>
+  <td>confirmed</td>
+  <td>3 repro · 3 regr</td>
+  <td>spec-gap</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><a href="../bugs/BUG-20260731-VPVV-capa-sem-classe-vira-camera/bug.md">VPVV</a></td>
+  <td><span class="pill high">high</span> P1</td>
+  <td><span class="pill active">active</span> delivering</td>
+  <td>Contrato do mira-studio não exige class="capa" e a capa gerada vira um slide de câmera vazio</td>
+  <td>confirmed</td>
+  <td>2 repro · 2 regr</td>
+  <td>spec-gap</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><a href="../bugs/BUG-20260731-UDTY-full-sem-full-wrap/bug.md">UDTY</a></td>
+  <td><span class="pill medium">medium</span> P2</td>
+  <td><span class="pill active">active</span> delivering</td>
+  <td>Contrato do layout full omite .full-wrap e o slide perde a área segura do formato</td>
+  <td>confirmed</td>
+  <td>1 repro · 2 regr</td>
+  <td>spec-gap</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><a href="../bugs/BUG-20260731-JJ6X-remontagem-sobrescreve-roteiro/bug.md">JJ6X</a></td>
+  <td><span class="pill high">high</span> P1</td>
+  <td><span class="pill active">active</span> delivering</td>
+  <td>Re-montagem sobrescreve o roteiro.md editado pelo usuário sem aviso</td>
+  <td>confirmed</td>
+  <td>1 repro · 2 regr</td>
+  <td>spec-gap</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><a href="../bugs/BUG-20260731-BNO4-contagem-de-section-conta-comentario/bug.md">BNO4</a></td>
+  <td><span class="pill high">high</span> P1</td>
+  <td><span class="pill active">active</span> delivering</td>
+  <td>Folha aprovada pelo validate-run derruba a montagem porque a contagem final conta section citado em comentário</td>
+  <td>confirmed</td>
+  <td>3 repro · 3 regr</td>
+  <td>spec-correta</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><a href="../bugs/BUG-20260731-ETPU-falha-tardia-deixa-deck-meio-instalado/bug.md">ETPU</a></td>
+  <td><span class="pill medium">medium</span> P2</td>
+  <td><span class="pill active">active</span> delivering</td>
+  <td>Falha tardia da montagem deixa o deck meio instalado, com módulos e launcher mas sem HTML</td>
+  <td>confirmed</td>
+  <td>2 repro · 2 regr</td>
+  <td>spec-gap</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><a href="../bugs/BUG-20260731-AMOM-validador-studio-frouxo/bug.md">AMOM</a></td>
+  <td><span class="pill medium">medium</span> P2</td>
+  <td><span class="pill active">active</span> delivering</td>
+  <td>Validador de fragmento dos formatos Studio aceita palco sem .anim-stage e svg sem id</td>
+  <td>confirmed</td>
+  <td>2 repro · 2 regr</td>
+  <td>spec-correta</td>
+</tr>
+</tbody>
+</table>
+
+<h2>Travados (DONE.md)</h2>
+<p class="prose">Nenhum. A closure policy <code>package</code> exige merge e versão publicada;
+até lá, nenhum bug recebe a trava e nenhuma pasta vira somente leitura.</p>
+
+<h2>Planos de correção</h2>
+<table>
+<thead><tr><th>bug</th><th>risco</th><th>plano</th></tr></thead>
+<tbody>
+<tr><td>K4NR</td><td>baixa</td><td><a href="../bugs/BUG-20260731-K4NR-validador-section-em-comentario/fix/plan.html">fix/plan.html</a></td></tr>
+<tr><td>VPVV</td><td>baixa</td><td><a href="../bugs/BUG-20260731-VPVV-capa-sem-classe-vira-camera/fix/plan.html">fix/plan.html</a></td></tr>
+<tr><td>UDTY</td><td>baixa</td><td><a href="../bugs/BUG-20260731-UDTY-full-sem-full-wrap/fix/plan.html">fix/plan.html</a></td></tr>
+<tr><td>JJ6X</td><td>baixa</td><td><a href="../bugs/BUG-20260731-JJ6X-remontagem-sobrescreve-roteiro/fix/plan.html">fix/plan.html</a></td></tr>
+<tr><td>BNO4</td><td>baixa</td><td><a href="../bugs/BUG-20260731-BNO4-contagem-de-section-conta-comentario/fix/plan.html">fix/plan.html</a></td></tr>
+<tr><td>ETPU</td><td>baixa</td><td><a href="../bugs/BUG-20260731-ETPU-falha-tardia-deixa-deck-meio-instalado/fix/plan.html">fix/plan.html</a></td></tr>
+<tr><td>AMOM</td><td>baixa</td><td><a href="../bugs/BUG-20260731-AMOM-validador-studio-frouxo/fix/plan.html">fix/plan.html</a></td></tr>
+</tbody>
+</table>
+
+</div>
+</body>
+</html>

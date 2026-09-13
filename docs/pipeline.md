@@ -16,13 +16,41 @@ flowchart TD
 
 | Step | Agent | What it does |
 |---|---|---|
-| 0 | **mira-new** | Conversational entry point. Scaffolds `decks/<theme>/` (name, deck template, base theme, color, references). Does not generate slides — it prepares the ground. |
+| 0 | **mira-new** | Conversational entry point. Creates the `decks/<theme>/` structure with `references/` as its very first action, so you can drop the source material in before choosing anything, then assembles the deck (template, base theme, color). Does not generate slides, it prepares the ground. |
 | 1 | **mira-extract** | Reads a linked source (project, PDF, LaTeX or text) and produces a structured **briefing**. First link in the chain. |
 | 2 | **mira-planner** | Analyzes the briefing and proposes a detailed **slide plan**, then waits for your approval before anything is built. |
 | 3 | **mira-copywriter** | Refines the text to slide altitude and specifies images. |
 | 4 | **mira-builder** | The assembly engine. Builds interactive HTML/Tailwind from modular glassmorphism cards with card-by-card navigation. |
 | 5 | **mira-animator** | Adds the motion, and the metaphor. Every concept slide becomes an animated **concrete everyday analogy** with a **mandatory internal loop**: it enters with choreography and then loops. It also replaces an existing slide's animation in place. Stamps each animation with a `<!-- @MIRA:SIZE 3/10 -->` marker. |
 | 6 | **mira-validator** | Analyzes the generated HTML and produces a conformance report: visual, structural and asset checks. |
+
+## The parallel path: `mira-fast`
+
+The main line is not the only way to get to a deck. **[`/mira-fast`](agentes/core.md#mira-fast)** is an alternative entry point that covers the whole chain in a single call: a central agent plans the deck, then **one leaf per slide runs in parallel**, with deterministic assembly at the end.
+
+It is not a step in the table above, it replaces it. You trade the approval pauses between agents for speed: `/mira-fast` asks nothing, from topic to final HTML. Use the main line when you want to approve the slide plan before anything is built; use `/mira-fast` when you want the deck done in one go.
+
+## The narrative chain
+
+Always installed, with the **Story Team**, it runs **before** the main line: it decides what the story is, before anyone decides what the slides are. None of these agents writes HTML, and none of them creates the animated metaphor, which stays with `mira-animator`.
+
+| Step | Agent | What it does |
+|---|---|---|
+| -1 | **mira-brainstorming** + **mira-concept-align** + **mira-storyboard** | Optional, and offered before everything else: finds the angle when only a theme exists, clears the idea, then draws it as a cheap sketch in `storyboard/` so you can reject a misunderstanding before it becomes an animation. Closing it makes the deck **linked**, and from there the approved concept is mandatory reading downstream. |
+| 0 | **mira-cinema-deck** | Orchestrates the whole chain: creates the deck with `--cinema`, runs the seven stages in order and hands off to `mira-animator`. Without it the camera direction is written and never implemented. |
+| 1 | **mira-premise-forge** | Researches current facts and turns the Eureka hidden in them into a defensible **Premise Brief**. |
+| 2 | **mira-concept-storyteller** | Sets the **Concept Contract**: what the story must teach and may never distort. |
+| 3 | **mira-story-architect** | Builds the **Story Bible**: structure, characters, theme, world, symbols, plot and scenes. |
+| 4 | **mira-design-audience-journey** | Designs the **Audience Journey Map**: attention, curiosity, emotion and revelation, beat by beat. |
+| 5 | **mira-direct-slide-sequence** | Turns the story into a **MIRA Slide Score**, one scene per slide, with a causal transition into the next. |
+| 6 | **mira-direct-scene** | Directs the **staging**: composition, blocking, depth planes with occlusion, framing, legibility and the deck's single color grade. |
+| 7 | **mira-direct-cinematic-motion** | Writes the **MIRA Motion Score**: temperament, beats, camera, easing, internal loop, and the handoff `mira-animator` implements. |
+| 8 | **mira-scene-brief** | Distils the chain into a short, **self-contained scene brief per slide**, so whoever draws the animation never reads the chain. Carries the anchor that links one slide to the next. |
+| 9 | **mira-asset-scout** | Decides **where each actor comes from**: draw it (simple geometry), fetch an open source SVG and inline it, or ask the author for the file. Human figures, hands, faces, animals and vehicles may never be hand drawn. |
+
+For a slide where the cinema **is** the scene, not the seasoning, `mira-animator` has a sibling: **`mira-cine-animator`**. It inherits the whole method by reference and inverts two locks, so a camera move, a depth plane or the atmosphere may be the dominant state change, and the cut score is judged with the cinema on. Invoked explicitly, never by default.
+
+It is worth it for a deck that has to convince, teach or be recorded. For a quick internal deck, the main line already does the job.
 
 ## Motion-tuning agents
 
@@ -32,6 +60,7 @@ These run on top of an existing deck.
 |---|---|
 | **mira-animated-metaphor** | Compatibility alias for `mira-animator` (replace mode), kept because it is cited in published material. |
 | **mira-size-animator** | Reads the `@MIRA:SIZE N/10` marker and scales the perceived size of animations (radii, lengths, spacing, internal fonts, glow) on a 1–10 scale, without changing the stage height or breaking the loop. *"Put the animations at 6/10."* |
+| **mira-sequence-director** | Orchestrator of the long take: turns one explanation into a chain of chained slides the audience reads as a single animation. Applies a form test with the power to refuse, writes a continuity script to `references/sequence-director-<id>.md`, and builds the chain **serially**, scene 1 through `mira-animator` and every following link through `mira-sequence`. Serial by contract, not by preference: link N+1 has to be written after reading link N. |
 
 ## Visual / image agents
 
@@ -53,6 +82,7 @@ These drop a specific element into a slide.
 | **mira-qrcode** | Inserts a large, centered, scannable QR code from a link or text, generated locally and embedded as inline SVG, so it works from `file://` with no runtime dependency. |
 | **mira-survey** | Builds a live poll slide: a QR code for the audience to vote on a Google Form and a chart (3D donut or bars) that updates in real time by reading the responses spreadsheet via the `gviz` endpoint over JSONP (works from `file://`). Takes the voting link and the spreadsheet link; if one is missing, it asks. |
 | **mira-quiz** | Builds a live quiz slide: QR code for the audience to answer in Google Forms, spreadsheet reading via `gviz` over JSONP, presenter-controlled correct-answer reveal, and percentages shown only after reveal. |
+| **mira-post-it** | Builds a live post-it wall across two slides: question plus QR on the first, and on the second every free-text answer sticks into its own slot, one at a time, 15 per page, with the arrow key turning the page. |
 | **mira-image** | Places an image you already have (local file or URL) into a slide, copied into `assets/` and referenced by a relative path. Clean card, image static with the loop on the frame. Works from `file://` with no server. To generate an image see `mira-visuals`; to animate one see `mira-img-animator`. |
 | **mira-svg-morph** | Generates a slide where one SVG shape morphs into another in a continuous loop (GSAP + MorphSVGPlugin vendored locally). You pass 2+ `.svg` files; 2 go back and forth, N chain. Inlines the paths with unique ids and runs `convertToPath`. Works from `file://`. |
 | **mira-icon-morph** | The same morph from concepts in words: searches the Iconify API, validates the license (MIT/Apache/CC0/CC-BY), records attribution in `CREDITS.md`, and refuses protected IP. Reuses the render core of `mira-svg-morph`. |

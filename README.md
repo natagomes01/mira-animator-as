@@ -62,7 +62,7 @@ The agents read from the sources, but write only to `decks/`.
 
 ## Creating a deck
 
-In Claude, just talk to `/mira-new` in plain language. It drives the creation conversationally (theme name, deck template, base theme, primary color and references), assembles the `decks/<theme>/` folder and, at the end, offers to trigger the pipeline.
+In Claude, just talk to `/mira-new` in plain language. It asks for the theme name and immediately creates the `decks/<theme>/` structure, with `references/` ready, so you can drop your source material in straight away, then it stops and asks whether you would rather describe the presentation in chat or put the files in that folder. From there it drives the rest conversationally (deck template, base theme, primary color), assembles the deck and, at the end, offers to trigger the pipeline.
 
 ```text
 /mira-new create a new presentation called 'my-class'
@@ -115,11 +115,32 @@ mira-visuals          static images: panels, diagrams, charts and infographics
 mira-validator        final conformance report
 ```
 
-Support skills: `mira-img-animator` (animates existing images), `mira-chart` (data charts from CSV/JSON, images or hand sketches, with a best-type recommendation) and `mira-image-template` (builds a new deck template from screenshots and/or a logo, recognizing the design system and layout, then registers it for `mira-new`). Entry and helpers: `mira-new`, `mira-references`, `mira-get-videos`, `mira-offline` (turns a finished deck **self-contained / offline**: copies the libraries it would otherwise load from a CDN — Tailwind, AOS, Lucide, D3 and the Inter font — into the deck and rewrites the HTML to local paths, so it opens from `file://` even behind a corporate firewall; downloads nothing at runtime).
+Support skills: `mira-img-animator` (animates existing images), `mira-chart` (data charts from CSV/JSON, images or hand sketches, with a best-type recommendation) and `mira-image-template` (builds a new deck template from screenshots and/or a logo, recognizing the design system and layout, then registers it for `mira-new`). Entry and helpers: `mira-new`, `mira-fast` (the whole deck in one call, slides generated in parallel), `mira-references`, `mira-get-videos`, `mira-offline` (turns a finished deck **self-contained / offline**: copies the libraries it would otherwise load from a CDN — Tailwind, AOS, Lucide, D3 and the Inter font — into the deck and rewrites the HTML to local paths, so it opens from `file://` even behind a corporate firewall; downloads nothing at runtime).
 
-On-slide elements: `mira-3d` (a true 3D element, auto-rotating and draggable, choosing CSS 3D, procedural Three.js or a glTF `.glb`; a `.glb` slide needs a local server, so the agent starts one and writes a double-click launcher), `mira-qrcode` (a scannable QR code from a link or text, generated locally as inline SVG, works from `file://`), `mira-survey` (a live poll slide: the audience scans a QR to vote on a Google Form and a 3D donut or bar chart updates in real time by reading the responses sheet via gviz/JSONP, works from `file://`), `mira-quiz` (a live quiz slide: the audience answers a multiple-choice Google Form, the presenter reveals the correct answer on command, and percentages plus a basic ranking appear from the same gviz/JSONP sheet feed), `mira-chart-race` (a racing-chart slide: temporal data from a wide CSV animates over time, bars swapping rank or lines drawing in, playing once and stopping at the end, embedded inline so it works from `file://`), `mira-image` (places an image you already have into a slide, copied into `assets/` and referenced by a relative path, image static with the loop on the frame, works from `file://`), `mira-svg-morph` (one SVG shape morphs into another in a continuous loop, GSAP MorphSVG vendored locally, works from `file://`), `mira-icon-morph` (the same morph from concepts in words, sourcing licensed icons from the Iconify API), `mira-svg-animator` (animates an SVG you provide: flap, spin, slide or draw, splitting a single merged path to move one part) and `mira-animated-typing` (the "prompt typed in zoom" scene: giant terminal monospace text typed character by character with a Windows-style blinking cursor, sliding left once it reaches 100px before the right edge, per-span color via a `color=#HEX` tag, pure JS/CSS, works from `file://`).
+On-slide elements: `mira-3d` (a true 3D element, auto-rotating and draggable, choosing CSS 3D, procedural Three.js or a glTF `.glb`; a `.glb` slide needs a local server, so the agent starts one and writes a double-click launcher), `mira-qrcode` (a scannable QR code from a link or text, generated locally as inline SVG, works from `file://`), `mira-survey` (a live poll slide: the audience scans a QR to vote on a Google Form and a 3D donut or bar chart updates in real time by reading the responses sheet via gviz/JSONP, works from `file://`), `mira-quiz` (a live quiz slide: the audience answers a multiple-choice Google Form, the presenter reveals the correct answer on command, and percentages plus a basic ranking appear from the same gviz/JSONP sheet feed), `mira-post-it` (a live post-it wall across two slides: the question with a QR on the first, and on the second every free-text answer from the audience sticks into its own slot, one at a time, from the same gviz/JSONP sheet feed, holding answers in a queue while the question slide is up so the wall always fills in front of the room; 15 per page with the arrow key turning the page, and a grid born at its final size so nothing reflows as answers land), `mira-chart-race` (a racing-chart slide: temporal data from a wide CSV animates over time, bars swapping rank or lines drawing in, playing once and stopping at the end, embedded inline so it works from `file://`), `mira-image` (places an image you already have into a slide, copied into `assets/` and referenced by a relative path, image static with the loop on the frame, works from `file://`), `mira-svg-morph` (one SVG shape morphs into another in a continuous loop, GSAP MorphSVG vendored locally, works from `file://`), `mira-icon-morph` (the same morph from concepts in words, sourcing licensed icons from the Iconify API), `mira-svg-animator` (animates an SVG you provide: flap, spin, slide or draw, splitting a single merged path to move one part) and `mira-animated-typing` (the "prompt typed in zoom" scene: giant terminal monospace text typed character by character with a Windows-style blinking cursor, sliding left once it reaches 100px before the right edge, per-span color via a `color=#HEX` tag, pure JS/CSS, works from `file://`).
+
+Slide-to-slide continuity: `mira-sequence` creates the next slide already standing on the exact pose the previous one was in, with a dry cut between the two, so the pair reads as a single slide whose animation changes behaviour halfway through. A perpetual loop has no last frame, so the source slide publishes its actors' live pose and the continuation locks it the moment it enters: hand over with the ball mid-air and it carries on mid-air. A declared rest pose is the mandatory fallback, so the slide still works for anyone opening the deck straight on it and for `mira-slide-to-video`. The deck's global transition is never touched, the dry cut belongs to that pair alone.
+
+A whole explanation as one long take: `mira-sequence-director` is the orchestrator above `mira-sequence`. You describe what you want to explain and it turns that into a chain of chained slides the audience reads as a single animation. It first applies a form test with the power to refuse, because an explanation that switches world, scale or subject halfway is not a long take. Approved, it writes a continuity script to `references/sequence-director-<id>.md` in the deck, declaring per scene which actors cross the cut, which enter, which leave, the action, the rest pose as an expression, and what changes next. Then it builds the chain serially: scene 1 through `mira-animator`, every following link through `mira-sequence`, each one written after reading the previous link's source, because link N+1's fallback pose has to carry the same expression as link N's rest.
+
+Concept alignment, before any production and always optional: `mira-brainstorming` (the door, for when only a theme exists: competing angles, cut down with each one's cost declared, closing on the single sentence the deck is about), `mira-concept-align` (clears the idea, detects ambiguity, teaches your own idea back to you and only closes when **you** say so) and `mira-storyboard` (draws the competing metaphors as real SVG plus PNG frames in `storyboard/` at the deck root, versioned, corrected in plain language). Approving a storyboard makes the deck **linked**, and from there the approved concept becomes mandatory, verifiable reading for everyone downstream: check it with `npx mira-animator storyboard verify <deck>`.
+
+Storytelling chain (optional, installed with the **Story Team**), orchestrated end to end by `mira-cinema-deck` (creates the deck with cinema mode installed, runs the chain in order and hands the Motion Score to the animator): `mira-premise-forge` (digs the Eureka out of current facts and forges a defensible premise), `mira-concept-storyteller` (the concept contract: what the story must teach and may never distort), `mira-story-architect` (the Story Bible: structure, characters, theme, world, symbols and scenes), `mira-design-audience-journey` (attention, curiosity, emotion and revelation, beat by beat), `mira-direct-slide-sequence` (one scene per slide, each transition causal), `mira-direct-scene` (the staging: composition, blocking, depth planes with occlusion, framing, legibility and the deck's single color grade) `mira-direct-cinematic-motion` (the motion score: temperament, beats, camera, easing and internal loop) `mira-scene-brief` (distils it all into a short, self-contained scene brief per slide, carrying the anchor that links one slide to the next) and `mira-asset-scout` (decides where each actor comes from: draw it, fetch an open source SVG and inline it, or ask the author, since human figures, hands, faces, animals and vehicles may never be hand drawn). The chain runs before the main line and writes no HTML: it hands one brief at a time to `mira-animator`, which writes the animation into the deck.
 
 Each orchestrator pauses between agents and keeps you in control of every step.
+
+### One-shot: `mira-fast`
+
+`mira-fast` is an alternative entry point that covers the whole chain in a single call. A central agent plans the deck, then **one leaf per slide runs in parallel**, and a deterministic script assembles the final file:
+
+```text
+/mira-fast spec driven development
+/mira-fast /mira-studio <topic or path>       # Studio 9:16
+/mira-fast /mira-studio-full <topic or path>  # Studio Full 16:9
+/mira-fast /mira-vertical <topic or path>     # vertical 9:16
+```
+
+It asks nothing, from topic to final HTML, so you trade the approval pauses above for speed. Before planning it creates the `decks/<theme>/` structure with `references/` and shows you the full path, so material you drop there is part of the plan. It never infers the format from the topic, and a source you point at that does not exist on disk fails immediately instead of producing an invented deck. Requires Claude Code 2.1.154 or newer with **Dynamic workflows** enabled in `/config`.
 
 ---
 
@@ -132,11 +153,37 @@ Starting from the 16:9 deck, without touching the original:
 | `mira-squared` | `index-1x1.html` | 1:1 (1080×1080) | Feed, LinkedIn |
 | `mira-vertical` | `index-9x16.html` | 9:16 (1080×1920) | Reels, Shorts, Stories, TikTok |
 | `mira-thirds` | `index-thirds.html` | rule of thirds | leaves a third free for text / presenter video |
-| `mira-studio` | `decks/<name>/` | 9:16 (1080×1920) | recording deck with the presenter's webcam live inside the slide (OBS-ready, native MP4 recording) |
-| `mira-studio-full` | `decks/<name>/index-16x9.html` | 16:9 (1920×1080) | full-hd recording deck with the webcam live inside the slide, roteiro.md-driven slides and an out-of-video teleprompter |
+| `mira-studio` | `decks/<name>/` | 9:16 (1080×1920) | recording deck with the presenter's webcam live inside the slide (OBS-ready, native MP4 recording with **stereo audio** and A/V-aligned tracks) |
+| `mira-studio-full` | `decks/<name>/index-16x9.html` | 16:9 (1920×1080) | full-hd recording deck with the webcam live inside the slide, roteiro.md-driven slides, an out-of-video teleprompter and the same **stereo + A/V-aligned** recorder |
 | `mira-transition-dissolve` | `index-dissolve.html` | dissolve | real crossfade between slides (Canva style) |
 
 `mira-squared` and `mira-vertical` lock the slides to the target ratio (fixed frame) and shrink the side gaps. `mira-thirds` is a **composition** variant (it does not change the ratio): it pushes content into the left two-thirds and leaves the right column free to overlay text, a lower-third or the presenter's video in editing. `mira-transition-dissolve` swaps the scroll between slides for a real crossfade via the View Transitions API, it works on `file://` with no server (Chrome/Edge).
+
+### Recording yourself inside the deck (native recorder)
+
+The Studio formats record straight from the browser: press **R** and the deck writes an MP4 to
+disk, no OBS, no chroma key, no compositing in the editor. A 5-second countdown runs first and
+never enters the video. What comes out of the recorder, as of **0.1.61**:
+
+- **Stereo audio.** Two channels are requested as `ideal`, never `exact`, so a mono microphone
+  can never break the recording. When the track still arrives mono, the channel is duplicated
+  through a Web Audio graph and the panel labels it `stereo (dup)` — never plain `stereo`.
+  Chrome's voice-processing filters (echo cancellation, noise suppression, auto gain) stay
+  **on**: switching them off is the only way to pull real stereo out of a device the chain is
+  flattening, but it changes how your audio sounds, so that call is yours.
+- **Audio and video aligned.** Both tracks are brought to a common origin before muxing, so the
+  real distance between the two capture starts survives in the file. It used to be discarded:
+  each track was zeroed at its own first frame, and the offset measured up to 30 ms on real
+  recordings — enough for a trained eye to catch.
+- **Constant frame rate** (the `CFR (edit)` switch, on by default) so editors that conform VFR
+  to a fixed grid, Adobe Premiere among them, stop accumulating lip-sync drift along the clip.
+- **A panel that shows its work.** Live counters for effective fps, dropped and duplicated
+  frames, plus `mic 2ch` and `A/V ±N ms`. The `save diagnostics JSON` button dumps everything,
+  including `mic{}` (what the microphone actually delivered) and `av{}` (the measured offset).
+  If a recording degrades, it is marked **PARTIAL** and the reason is named, never silent.
+
+**A deck that already exists does not get these fixes on its own.** Run
+`npx mira-animator edit <deck>` to update the recorder inside it. New decks ship corrected.
 
 ### From slides to an actual video file
 
@@ -163,6 +210,7 @@ npx mira-animator sources            # list linked sources
 npx mira-animator new <name>         # create a deck from a template
 npx mira-animator edit <deck>        # turn on edit mode (reorder slides) on an existing deck
 npx mira-animator memoria <sub>      # preference memory (lembrancas, nota, consolidar, estado)
+npx mira-animator plugin <sub>       # your own agents (list, sync, validate, pack, add)
 npx mira-animator status             # show install and deck state
 npx mira-animator update             # update agents and templates
 npx mira-animator uninstall          # remove Mira from the current folder
@@ -173,12 +221,69 @@ npx mira-animator uninstall          # remove Mira from the current folder
 | `install` | Installs Mira in the current folder (agents, templates, config) |
 | `link <path>` | Links a folder or file as a content source. Options: `--name=<alias>` `--type=projeto\|pdf\|latex\|texto` |
 | `sources` | Lists linked sources |
+| `new <name>` | Creates a deck from an installed template. Options: `--deck=<template>` `--theme=<theme>` |
+| `edit <deck>` | Installs or updates edit, free-edit and drawing tools in an existing deck |
 | `status` | Shows install and deck state |
 | `update` | Updates agents and templates to the latest version |
 | `uninstall` | Removes Mira from the current folder |
 | `memoria <sub>` | Preference memory. `lembrancas` prints what applies to a slide, `nota` records an explicit order, `consolidar` turns repeated corrections into candidate notes, `estado` activates/suspends/revokes one |
+| `plugin <sub>` | Your own agents. `list`, `sync`, `validate [<id>]`, `pack <id>`, `add <file>` (see [Plugins](#plugins-your-own-agents)) |
 
-> Creating a deck is **not** a CLI command — you do it conversationally in Claude with `/mira-new` (see [Creating a deck](#creating-a-deck)).
+> You can create a deck directly with `npx mira-animator new <name>` or conversationally with `/mira-new` (see [Creating a deck](#creating-a-deck)).
+
+---
+
+## Plugins: your own agents
+
+Mira ships 40+ agents. A **plugin** is an agent *you* write, living in `mira-plugins/` in your own
+folder. It never touches the Mira package, and you can share it with anyone.
+
+```
+your-folder/
+  mira-plugins/
+    yourname-something/
+      mira-plugin.json     manifest
+      SKILL.md             the agent
+      references/          optional
+      assets/              optional
+```
+
+**Installing is putting the folder in `mira-plugins/`. Uninstalling is deleting it.** Mira
+reconciles on session start: a new folder gets activated, a deleted one gets removed from your
+skills directory. No command required either way. If none of your engines has a session hook,
+run `npx mira-animator plugin sync` yourself.
+
+```bash
+npx mira-animator plugin list              # what you have and its state
+npx mira-animator plugin sync              # reconcile now, without waiting for a session
+npx mira-animator plugin validate          # check every manifest
+npx mira-animator plugin pack <id>         # produce <id>-<version>.mplug to share
+npx mira-animator plugin add <file>        # install someone else's .mplug
+```
+
+### Creating one
+
+Use `/mira-new-plugin`. It checks whether [Reversa](https://github.com/sandeco/reversa) is
+installed, installs it with your confirmation if not, then runs the spec and implementation
+cycle writing straight into `mira-plugins/<id>/`.
+
+Two things worth knowing before you start:
+
+- **Your specs stay on your machine.** They live in `_reversa_sdd/` and `_reversa_forward/` and
+  do not travel inside the `.mplug`. Whoever receives your plugin gets it working, not the specs.
+- **Installing a plugin is not required to have Reversa.** Only creating one is.
+
+### Rules Mira enforces
+
+| Rule | Why |
+|---|---|
+| Id is `<author>-<name>`, lowercase with a hyphen | Readable and collision resistant |
+| Id cannot start with `mira-` | Reserved for native agents, so your plugin never breaks when Mira ships a new one |
+| Folder name, manifest `id` and SKILL.md `name` must match | Otherwise the agent is unreachable |
+| No executable files (`.js`, `.sh`, `.bat`, `.ps1`, `.py`, …) | Plugins activate on their own at session start; third party code entering unattended is not a risk worth taking in v1 |
+| Everything the plugin needs lives inside its own folder | So deleting the folder really uninstalls it |
+
+Start from `mira-templates/authoring/plugin-exemplo/`, which is a valid skeleton.
 
 ---
 
