@@ -23,12 +23,12 @@ Upstream é **PolyForm-Noncommercial-1.0.0**. A licença permite **monetizar o V
 - `package.json`: o alias de `bin` `mira-animator`
 - `bin/mira.js`, linha 1: o shebang termina em LF. O upstream entrega `#!/usr/bin/env node\r\n`, e no macOS o `env` procura um executável chamado `node\r` e falha
 - `templates/decks/mira-studio-demo/index.html`: o índice do slide é estado (`var idx`), não leitura de `window.scrollY` (commit `beafabb`). O upstream ainda não corrigiu; reaplicar se o merge perder
-- este `CLAUDE.md` e as specs em `docs/`
+- este `CLAUDE.md`, a pasta `albatroz/` (script da rotina) e as specs em `docs/`
 
 O CLI lê decks e temas do disco desde a v0.1.49, então tema ou template novo da marca **não precisa** de registro em código. Basta o arquivo em `templates/`.
 
 ## Trazer atualização do upstream
-Roda sempre aqui, nunca direto na pasta de slides.
+Roda sempre aqui, nunca direto na pasta de slides. A sequência inteira está em `./albatroz/atualizar-upstream.sh` (para em conflito e explica o que fazer; `--checar` só confere o inventário). O passo a passo abaixo é o que o script faz, para quem quer rodar à mão ou entender o que ele decide.
 
 ```bash
 cd ~/dev/mira-animator-as
