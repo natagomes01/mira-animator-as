@@ -19,8 +19,10 @@ Upstream é **PolyForm-Noncommercial-1.0.0**. A licença permite **monetizar o V
 - `templates/themes/albatroz-dark.css`, `albatroz-army.css`, `albatroz-deco.css`, `albatroz-deco-light.css`
 - `templates/decks/albatroz-deco/` (capa com a logo, 4 blocos animados)
 - `templates/themes/base.css`: a linha `font-family: var(--mira-font-body, 'Inter')`, que faz os temas da marca puxarem Raleway
-- `lib/commands/new.js`: `albatroz-deco` dentro de `animationOnly` (o template tem paleta própria no bloco `@MIRA:THEME`)
+- `lib/commands/new.js`: `'albatroz-deco'` dentro do Set `THEME_AGNOSTIC` (o template tem paleta própria no bloco `@MIRA:THEME`)
 - `package.json`: o alias de `bin` `mira-animator`
+- `bin/mira.js`, linha 1: o shebang termina em LF. O upstream entrega `#!/usr/bin/env node\r\n`, e no macOS o `env` procura um executável chamado `node\r` e falha
+- `templates/decks/mira-studio-demo/index.html`: o índice do slide é estado (`var idx`), não leitura de `window.scrollY` (commit `beafabb`). O upstream ainda não corrigiu; reaplicar se o merge perder
 - este `CLAUDE.md` e as specs em `docs/`
 
 O CLI lê decks e temas do disco desde a v0.1.49, então tema ou template novo da marca **não precisa** de registro em código. Basta o arquivo em `templates/`.
@@ -36,7 +38,17 @@ git fetch upstream
 git merge upstream/main
 ```
 
-Conflito esperado: só onde a Albatroz encostou na lista acima. Resolvendo, confira que sobreviveram a linha `--mira-font-body` no `base.css`, o `albatroz-deco` no `animationOnly` e o alias de `bin`. Depois:
+Antes do merge de verdade, o ensaio que lista os conflitos sem tocar em nada:
+
+```bash
+git merge-tree --write-tree HEAD upstream/main | grep CONFLICT
+```
+
+Conflito esperado: só onde a Albatroz encostou na lista acima. Resolvendo, confira que sobreviveram a linha `--mira-font-body` no `base.css`, o `albatroz-deco` no `THEME_AGNOSTIC` e o alias de `bin`.
+
+**Conflito de arquivo inteiro (linha 1 até a última) é CRLF, não conteúdo.** O mantenedor do upstream trabalha no Windows e às vezes converte um arquivo inteiro para `\r\n`. Confira com `git show upstream/main:<arquivo> | grep -c $'\r'`. Resolução: tomar a versão do upstream, reaplicar a edição Albatroz por cima e entregar o arquivo no MESMO fim de linha do upstream (`sed 's/$/\r/'` converte LF em CRLF), para o próximo merge cair no 3-way normal. Foi assim com o `mira-studio-demo` em 13/09/26.
+
+Depois:
 
 ```bash
 node --check bin/mira.js && node --check lib/commands/new.js
@@ -44,6 +56,8 @@ npx mira-animator status         # tem que apontar para este repo
 git push origin main
 cd ~/dev/albatroz-slides && npx mira-animator update
 ```
+
+A conferência final: `git diff --name-only upstream/main` tem que listar só arquivos da lista acima (mais `.gitignore` e `docs/`).
 
 O update na pasta de slides preserva arquivo que você editou lá (compara SHA-256 contra `.mira/_config/files-manifest.json` e reporta quantos preservou). O remote `upstream` está com push desabilitado de propósito: `git push upstream` falha, para ninguém empurrar código Albatroz no repo do Sandeco.
 
