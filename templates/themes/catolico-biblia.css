@@ -37,4 +37,25 @@ h1, h2, h3, .cb-display { font-family: var(--mira-font-display); font-weight: 60
 .cb-latin  { font-family: var(--mira-font-display); font-style: italic; }
 .cb-ribbon { background: var(--mira-accent-2); border-top: 2px solid var(--mira-primary); border-bottom: 2px solid var(--mira-primary); color: var(--mira-text); }
 .cb-underline { text-decoration: underline; text-decoration-color: var(--mira-primary); text-decoration-thickness: 3px; text-underline-offset: 6px; }
-.cb-ref { color: var(--mira-text-softer); font-size: 28px; }
+.cb-ref { color: var(--mira-text-softer); font-size: clamp(15px, 1.46vw, 28px); }
+
+/* Tamanhos fluidos (decisoes-sessao.md, 21/09/2026): clamp() ancorado no teto = valor da
+   identidade a 1920px. Nunca px fixo isolado num slide; estas classes substituem style="font-size:Npx". */
+.cb-text-title       { font-size: clamp(30px, 3.33vw, 64px); }
+.cb-text-title-hero  { font-size: clamp(48px, 4.38vw, 84px); }  /* titulo ampliado do slide 0, aprovado 21/09 */
+.cb-text-citacao     { font-size: clamp(24px, 2.29vw, 44px); }
+.cb-text-corpo       { font-size: clamp(19px, 1.875vw, 36px); }
+.cb-text-numero      { font-size: clamp(56px, 8.33vw, 160px); }
+.cb-text-keyword     { font-size: clamp(30px, 3.75vw, 72px); }
+.cb-text-keyword-sm  { font-size: clamp(30px, 2.71vw, 52px); }  /* palavra-chave de duas palavras (slide 3) */
+.cb-text-display-lg  { font-size: clamp(55px, 5vw, 96px); }     /* par yod/waw do slide 5 */
+
+/* Nota de rodape numerada (decisoes-sessao.md, secao 1b): sobrescrito no corpo, pilha no canto
+   inferior direito, longe do .cb-corner (que ocupa de 14px a 54px do canto). */
+sup.cb-note { font-size: 0.6em; color: var(--mira-primary); margin-left: 1px; }
+.cb-footnotes { position: absolute; bottom: 64px; right: 64px; z-index: 4; max-width: min(900px, 48vw); text-align: right; }
+.cb-footnotes p { margin: 0 0 2px 0; }
+.cb-footnotes p:last-child { margin-bottom: 0; }
+/* Reserva espaco para o .cb-footnotes nao cobrir a ultima linha do conteudo (slide com
+   secao centralizada via justify-center); aplicar no wrapper de conteudo, nao no section. */
+.cb-fn-space { padding-bottom: clamp(70px, 6.8vw, 130px); }
