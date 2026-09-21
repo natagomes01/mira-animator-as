@@ -1,0 +1,40 @@
+/* MIRA THEME: catolico-biblia (v0, 21/09/2026)
+   Católico na Bíblia. Marinho + ouro envelhecido + marfim + vermelho litúrgico.
+   Tokens: catolico/_padroes/identidade-catolico-na-biblia.md */
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,500;0,600;1,500&family=Atkinson+Hyperlegible:wght@400;700&family=Noto+Serif+Hebrew:wght@400;600&display=swap');
+:root {
+    --mira-primary:       #B8963E;   /* ouro envelhecido: destaque, moldura, linha */
+    --mira-primary-deep:  #8C7020;   /* ouro escuro: sombra do ouro, gradiente da barra */
+    --mira-accent-2:      #8B1E1E;   /* vermelho litúrgico: objeção, fita, botão */
+    --mira-crop:          #182C52;   /* campo: cartão, célula, palco */
+    --mira-bg:            #0F1F3D;   /* marinho */
+    --mira-text:          #F3EBDC;   /* marfim */
+    --mira-text-soft:     rgba(243, 235, 220, 0.72);
+    --mira-text-softer:   rgba(243, 235, 220, 0.48);
+    --mira-card-bg:       rgba(24, 44, 82, 0.55);
+    --mira-card-border:   rgba(184, 150, 62, 0.35);
+    --mira-glow-soft:     rgba(184, 150, 62, 0.14);
+    --mira-glow-strong:   rgba(184, 150, 62, 0.26);
+    --mira-icon-bg:       rgba(184, 150, 62, 0.12);
+    --mira-icon-border:   rgba(184, 150, 62, 0.35);
+    --mira-pill-bg:       rgba(243, 235, 220, 0.04);
+    --mira-pill-border:   rgba(184, 150, 62, 0.30);
+    --mira-stage-glow:    rgba(184, 150, 62, 0.06);
+    --mira-font-display:  'EB Garamond', Georgia, 'Times New Roman', serif;
+    --mira-font-body:     'Atkinson Hyperlegible', 'Helvetica Neue', Arial, sans-serif;
+    --cb-font-hebrew:     'Noto Serif Hebrew', 'David Libre', serif;
+}
+/* Moldura dupla em ouro, em todo slide (identidade, seção 3, item 1) */
+body > section { position: relative; }
+body > section::after {
+    content: ''; position: absolute; inset: 24px; pointer-events: none;
+    border: 1.5px solid var(--mira-primary);
+    outline: 0.75px solid rgba(184, 150, 62, 0.6); outline-offset: -8px;
+}
+h1, h2, h3, .cb-display { font-family: var(--mira-font-display); font-weight: 600; }
+.cb-hebrew { font-family: var(--cb-font-hebrew); direction: rtl; unicode-bidi: isolate; }
+.cb-greek  { font-family: var(--mira-font-display); }
+.cb-latin  { font-family: var(--mira-font-display); font-style: italic; }
+.cb-ribbon { background: var(--mira-accent-2); border-top: 2px solid var(--mira-primary); border-bottom: 2px solid var(--mira-primary); color: var(--mira-text); }
+.cb-underline { text-decoration: underline; text-decoration-color: var(--mira-primary); text-decoration-thickness: 3px; text-underline-offset: 6px; }
+.cb-ref { color: var(--mira-text-softer); font-size: 28px; }
