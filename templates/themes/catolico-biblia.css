@@ -51,9 +51,12 @@ h1, h2, h3, .cb-display { font-family: var(--mira-font-display); font-weight: 60
 .cb-text-display-lg  { font-size: clamp(55px, 5vw, 96px); }     /* par yod/waw do slide 5 */
 
 /* Nota de rodape numerada (decisoes-sessao.md, secao 1b): sobrescrito no corpo, pilha no canto
-   inferior direito, longe do .cb-corner (que ocupa de 14px a 54px do canto). */
+   inferior direito, longe do .cb-corner (que ocupa de 14px a 54px do canto) e do #mira-next
+   (botao "proximo", fixed right:32px/bottom:32px, 48px de diametro, ocupa ate 80px do canto —
+   right:100px da folga de 20px depois da borda do botao; achado de revisao das Tasks 5-6,
+   22/09/2026). */
 sup.cb-note { font-size: 0.6em; color: var(--mira-primary); margin-left: 1px; }
-.cb-footnotes { position: absolute; bottom: 64px; right: 64px; z-index: 4; max-width: min(900px, 48vw); text-align: right; }
+.cb-footnotes { position: absolute; bottom: 64px; right: 100px; z-index: 4; max-width: min(900px, 44vw); text-align: right; }
 .cb-footnotes p { margin: 0 0 2px 0; }
 .cb-footnotes p:last-child { margin-bottom: 0; }
 /* Reserva espaco para o .cb-footnotes nao cobrir a ultima linha do conteudo (slide com
