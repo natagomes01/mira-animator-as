@@ -65,7 +65,7 @@ sup.cb-note { font-size: 0.6em; color: var(--mira-primary); margin-left: 1px; }
 .cb-footnotes .cb-ref { font-size: inherit; color: inherit; }
 /* Reserva espaco para o .cb-footnotes nao cobrir a ultima linha do conteudo (slide com
    secao centralizada via justify-center); aplicar no wrapper de conteudo, nao no section. */
-.cb-fn-space { padding-bottom: clamp(70px, 6.8vw, 130px); }
+.cb-fn-space { padding-bottom: clamp(56px, 5.2vw, 100px); }
 
 /* Entrelinha por papel (plano de ajuste visual, secao 2, 23/09/2026) */
 :root {
