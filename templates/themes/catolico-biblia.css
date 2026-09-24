@@ -56,9 +56,90 @@ h1, h2, h3, .cb-display { font-family: var(--mira-font-display); font-weight: 60
    right:100px da folga de 20px depois da borda do botao; achado de revisao das Tasks 5-6,
    22/09/2026). */
 sup.cb-note { font-size: 0.6em; color: var(--mira-primary); margin-left: 1px; }
-.cb-footnotes { position: absolute; bottom: 64px; right: 100px; z-index: 4; max-width: min(900px, 44vw); text-align: right; }
+.cb-footnotes {
+    position: absolute; bottom: 64px; right: 100px; z-index: 4; max-width: min(900px, 44vw); text-align: right;
+    font-size: clamp(11px, .94vw, 18px); line-height: 1.45;
+}
 .cb-footnotes p { margin: 0 0 2px 0; }
 .cb-footnotes p:last-child { margin-bottom: 0; }
+.cb-footnotes .cb-ref { font-size: inherit; color: inherit; }
 /* Reserva espaco para o .cb-footnotes nao cobrir a ultima linha do conteudo (slide com
    secao centralizada via justify-center); aplicar no wrapper de conteudo, nao no section. */
 .cb-fn-space { padding-bottom: clamp(70px, 6.8vw, 130px); }
+
+/* Entrelinha por papel (plano de ajuste visual, secao 2, 23/09/2026) */
+:root {
+    --cb-lh-display: 1.1;
+    --cb-lh-citacao: 1.25;
+    --cb-lh-corpo:   1.4;
+    --cb-lh-denso:   1.15;
+}
+.cb-text-title, .cb-text-title-hero, .cb-text-keyword-sm { line-height: var(--cb-lh-display); }
+.cb-text-citacao { line-height: var(--cb-lh-citacao); }
+.cb-text-corpo   { line-height: var(--cb-lh-corpo); }
+.cb-text-numero, .cb-text-keyword, .cb-text-display-lg { line-height: 1; }
+.cb-dense { line-height: var(--cb-lh-denso); }
+
+/* Escala de espacamento fluida, teto a 1920 (plano de ajuste visual, secao 2) */
+:root {
+    --cb-s1: clamp(6px,  .52vw, 10px);
+    --cb-s2: clamp(10px, .94vw, 18px);
+    --cb-s3: clamp(16px, 1.67vw, 32px);
+    --cb-s4: clamp(22px, 2.08vw, 40px);
+    --cb-s5: clamp(32px, 3.33vw, 64px);
+}
+.cb-mb-1 { margin-bottom: var(--cb-s1); }
+.cb-mb-2 { margin-bottom: var(--cb-s2); }
+.cb-mb-3 { margin-bottom: var(--cb-s3); }
+.cb-mb-4 { margin-bottom: var(--cb-s4); }
+.cb-mb-5 { margin-bottom: var(--cb-s5); }
+.cb-gap-3 { gap: var(--cb-s3); }
+.cb-pad-card { padding: var(--cb-s3); }
+
+/* Eyebrow: rotulo de fonte em caixa alta (plano de ajuste visual, secao 3) */
+.cb-eyebrow {
+    font-family: var(--mira-font-body); font-weight: 700;
+    font-size: clamp(16px, 1.46vw, 28px);
+    letter-spacing: .12em; text-transform: uppercase;
+    line-height: 1.2; color: var(--mira-primary);
+}
+h1, h2, .cb-text-citacao { text-wrap: balance; }
+.cb-text-corpo { text-wrap: pretty; }
+
+/* Slide inteiro em vinho, no maximo 18% do deck, nunca dois seguidos (plano de ajuste
+   visual, secao 4) */
+:root { --cb-wine: #5E1A22; --cb-gold-soft: #E0C87F; }
+body > section.cb-wine { background: var(--cb-wine); }
+.cb-wine .primary-color, .cb-wine sup.cb-note,
+.cb-wine .cb-eyebrow, .cb-wine .cb-footnotes b { color: var(--cb-gold-soft); }
+.cb-wine .cb-underline { text-decoration-color: var(--cb-gold-soft); }
+.cb-wine .cb-ref { color: var(--mira-text-soft); }
+.cb-wine .glass-card {
+    background: rgba(0, 0, 0, .18); background-image: none;
+    border-color: rgba(224, 200, 127, .35); box-shadow: none;
+}
+
+/* Card sem contraste contra o fundo (plano de ajuste visual, secao 7.1): criterio misto,
+   vinho no card que e a virada do slide quando ha um so card de enfase, marfim nos demais.
+   Selector composto (.glass-card.cb-card-*) para vencer .cb-tessela-bg por especificidade,
+   independente da ordem no arquivo. */
+.glass-card.cb-card-marfim {
+    background: var(--mira-text); background-image: none;
+    border-color: rgba(15, 31, 61, .2); box-shadow: none;
+    color: var(--mira-bg);
+}
+.cb-card-marfim .cb-ref, .cb-card-marfim .text-soft, .cb-card-marfim .text-softer {
+    color: rgba(15, 31, 61, .68);
+}
+.cb-card-marfim sup.cb-note { color: var(--mira-primary-deep); }
+.cb-card-marfim .cb-underline { text-decoration-color: var(--mira-primary-deep); }
+
+.glass-card.cb-card-wine {
+    background: var(--mira-accent-2); background-image: none;
+    border-color: rgba(224, 200, 127, .35); box-shadow: none;
+}
+.cb-card-wine .primary-color, .cb-card-wine sup.cb-note, .cb-card-wine .cb-eyebrow {
+    color: var(--cb-gold-soft);
+}
+.cb-card-wine .cb-underline { text-decoration-color: var(--cb-gold-soft); }
+.cb-card-wine .cb-ref, .cb-card-wine .text-soft { color: var(--mira-text-soft); }
