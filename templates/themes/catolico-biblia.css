@@ -131,7 +131,7 @@ body > section.cb-wine { background: var(--cb-wine); }
 .cb-card-marfim .cb-ref, .cb-card-marfim .text-soft, .cb-card-marfim .text-softer {
     color: rgba(15, 31, 61, .68);
 }
-.cb-card-marfim sup.cb-note { color: var(--mira-primary-deep); }
+.cb-card-marfim sup.cb-note, .cb-card-marfim .cb-eyebrow { color: var(--mira-primary-deep); }
 .cb-card-marfim .cb-underline { text-decoration-color: var(--mira-primary-deep); }
 
 .glass-card.cb-card-wine {
