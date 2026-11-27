@@ -20,6 +20,8 @@ Cores nos exemplos: eles usam cores históricas (`#e47d5b`, `#FFA203`, `#222222`
 
 Siga integralmente `agents/_shared/idioma.md` (regra compartilhada de todos os agentes do Mira): todo texto visível em português brasileiro com acentuação 100% correta, revisado antes de finalizar.
 
+Siga também `agents/_shared/espacamento-ui.md` (padrão de espaçamento e UI fixado pelo Natã em 25/11/2026): unidade fluida que respeita a altura, escala de cinco passos, regras de cartão, tabela, barras, linha do tempo e passos numerados, grego em Gentium Plus, e conferência em três janelas antes de entregar.
+
 
 ## 📝 Instruções de Execução
 

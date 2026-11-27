@@ -1,7 +1,7 @@
 /* MIRA THEME: catolico-biblia (v0, 21/09/2026)
    Católico na Bíblia. Marinho + ouro envelhecido + marfim + vermelho litúrgico.
    Tokens: catolico/_padroes/identidade-catolico-na-biblia.md */
-@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,500;0,600;1,500&family=Atkinson+Hyperlegible:wght@400;700&family=Noto+Serif+Hebrew:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,500;0,600;1,500&family=Atkinson+Hyperlegible:wght@400;700&family=Gentium+Plus:wght@400;700&family=Noto+Serif+Hebrew:wght@400;600&display=swap');
 :root {
     --mira-primary:       #B8963E;   /* ouro envelhecido: destaque, moldura, linha */
     --mira-primary-deep:  #8C7020;   /* ouro escuro: sombra do ouro, gradiente da barra */
@@ -24,6 +24,18 @@
     --mira-font-body:     'Atkinson Hyperlegible', 'Helvetica Neue', Arial, sans-serif;
     --cb-font-hebrew:     'Noto Serif Hebrew', 'David Libre', serif;
 }
+/* Unidade fluida (24/11/2026): o menor entre 1vw e 1vh*16/9. Toda medida fluida do tema usa
+   calc(N * var(--cb-u)), nunca vw puro: janela baixa (1200x553) deixa de estourar o slide. */
+:root { --cb-u: min(1vw, 1.778vh); }
+
+/* Grego em Gentium Plus (SIL, OFL 1.1). O EB Garamond desenha Σ, Υ, Ξ e as ligaduras em forma
+   cursiva, ilegível em caixa alta. Arquivos locais: copiar mira-templates/vendor/fonts/gentium-*.woff2
+   para assets/vendor/fonts/ do deck; sem eles, cai no Gentium Plus do Google Fonts (@import acima). */
+@font-face { font-family:'CB Grego'; font-weight:400; src:url(assets/vendor/fonts/gentium-400.woff2) format('woff2'); unicode-range:U+0370-03FF; }
+@font-face { font-family:'CB Grego'; font-weight:400; src:url(assets/vendor/fonts/gentium-400-ext.woff2) format('woff2'); unicode-range:U+1F00-1FFF; }
+@font-face { font-family:'CB Grego'; font-weight:700; src:url(assets/vendor/fonts/gentium-700.woff2) format('woff2'); unicode-range:U+0370-03FF; }
+@font-face { font-family:'CB Grego'; font-weight:700; src:url(assets/vendor/fonts/gentium-700-ext.woff2) format('woff2'); unicode-range:U+1F00-1FFF; }
+:root { --cb-font-greek: 'CB Grego', 'Gentium Plus', var(--mira-font-display); }
 /* Moldura dupla em ouro, em todo slide (identidade, seção 3, item 1) */
 body > section { position: relative; }
 body > section::after {
@@ -33,22 +45,22 @@ body > section::after {
 }
 h1, h2, h3, .cb-display { font-family: var(--mira-font-display); font-weight: 600; }
 .cb-hebrew { font-family: var(--cb-font-hebrew); direction: rtl; unicode-bidi: isolate; }
-.cb-greek  { font-family: var(--mira-font-display); }
+.cb-greek  { font-family: var(--cb-font-greek); }
 .cb-latin  { font-family: var(--mira-font-display); font-style: italic; }
 .cb-ribbon { background: var(--mira-accent-2); border-top: 2px solid var(--mira-primary); border-bottom: 2px solid var(--mira-primary); color: var(--mira-text); }
 .cb-underline { text-decoration: underline; text-decoration-color: var(--mira-primary); text-decoration-thickness: 3px; text-underline-offset: 6px; }
-.cb-ref { color: var(--mira-text-softer); font-size: clamp(15px, 1.46vw, 28px); }
+.cb-ref { color: var(--mira-text-softer); font-size: clamp(15px, calc(1.46 * var(--cb-u)), 28px); }
 
 /* Tamanhos fluidos (decisoes-sessao.md, 21/09/2026): clamp() ancorado no teto = valor da
    identidade a 1920px. Nunca px fixo isolado num slide; estas classes substituem style="font-size:Npx". */
-.cb-text-title       { font-size: clamp(30px, 3.33vw, 64px); }
-.cb-text-title-hero  { font-size: clamp(48px, 4.38vw, 84px); }  /* titulo ampliado do slide 0, aprovado 21/09 */
-.cb-text-citacao     { font-size: clamp(24px, 2.29vw, 44px); }
-.cb-text-corpo       { font-size: clamp(19px, 1.875vw, 36px); }
-.cb-text-numero      { font-size: clamp(56px, 8.33vw, 160px); }
-.cb-text-keyword     { font-size: clamp(30px, 3.75vw, 72px); }
-.cb-text-keyword-sm  { font-size: clamp(30px, 2.71vw, 52px); }  /* palavra-chave de duas palavras (slide 3) */
-.cb-text-display-lg  { font-size: clamp(55px, 5vw, 96px); }     /* par yod/waw do slide 5 */
+.cb-text-title       { font-size: clamp(30px, calc(3.33 * var(--cb-u)), 64px); }
+.cb-text-title-hero  { font-size: clamp(48px, calc(4.38 * var(--cb-u)), 84px); }  /* titulo ampliado do slide 0, aprovado 21/09 */
+.cb-text-citacao     { font-size: clamp(24px, calc(2.29 * var(--cb-u)), 44px); }
+.cb-text-corpo       { font-size: clamp(19px, calc(1.875 * var(--cb-u)), 36px); }
+.cb-text-numero      { font-size: clamp(56px, calc(8.33 * var(--cb-u)), 160px); }
+.cb-text-keyword     { font-size: clamp(30px, calc(3.75 * var(--cb-u)), 72px); }
+.cb-text-keyword-sm  { font-size: clamp(30px, calc(2.71 * var(--cb-u)), 52px); }  /* palavra-chave de duas palavras (slide 3) */
+.cb-text-display-lg  { font-size: clamp(55px, calc(5 * var(--cb-u)), 96px); }     /* par yod/waw do slide 5 */
 
 /* Nota de rodape numerada (decisoes-sessao.md, secao 1b): sobrescrito no corpo, pilha no canto
    inferior direito, longe do .cb-corner (que ocupa de 14px a 54px do canto) e do #mira-next
@@ -58,14 +70,14 @@ h1, h2, h3, .cb-display { font-family: var(--mira-font-display); font-weight: 60
 sup.cb-note { font-size: 0.6em; color: var(--mira-primary); margin-left: 1px; }
 .cb-footnotes {
     position: absolute; bottom: 64px; right: 100px; z-index: 4; max-width: min(900px, 44vw); text-align: right;
-    font-size: clamp(11px, .94vw, 18px); line-height: 1.45;
+    font-size: clamp(11px, calc(.94 * var(--cb-u)), 18px); line-height: 1.45;
 }
 .cb-footnotes p { margin: 0 0 2px 0; }
 .cb-footnotes p:last-child { margin-bottom: 0; }
 .cb-footnotes .cb-ref { font-size: inherit; color: inherit; }
 /* Reserva espaco para o .cb-footnotes nao cobrir a ultima linha do conteudo (slide com
    secao centralizada via justify-center); aplicar no wrapper de conteudo, nao no section. */
-.cb-fn-space { padding-bottom: clamp(56px, 5.2vw, 100px); }
+.cb-fn-space { padding-bottom: clamp(56px, calc(5.2 * var(--cb-u)), 100px); }
 
 /* Entrelinha por papel (plano de ajuste visual, secao 2, 23/09/2026) */
 :root {
@@ -82,11 +94,11 @@ sup.cb-note { font-size: 0.6em; color: var(--mira-primary); margin-left: 1px; }
 
 /* Escala de espacamento fluida, teto a 1920 (plano de ajuste visual, secao 2) */
 :root {
-    --cb-s1: clamp(6px,  .52vw, 10px);
-    --cb-s2: clamp(10px, .94vw, 18px);
-    --cb-s3: clamp(16px, 1.67vw, 32px);
-    --cb-s4: clamp(22px, 2.08vw, 40px);
-    --cb-s5: clamp(32px, 3.33vw, 64px);
+    --cb-s1: clamp(6px, calc(.52 * var(--cb-u)), 10px);
+    --cb-s2: clamp(10px, calc(.94 * var(--cb-u)), 18px);
+    --cb-s3: clamp(16px, calc(1.67 * var(--cb-u)), 32px);
+    --cb-s4: clamp(22px, calc(2.08 * var(--cb-u)), 40px);
+    --cb-s5: clamp(32px, calc(3.33 * var(--cb-u)), 64px);
 }
 .cb-mb-1 { margin-bottom: var(--cb-s1); }
 .cb-mb-2 { margin-bottom: var(--cb-s2); }
@@ -99,7 +111,7 @@ sup.cb-note { font-size: 0.6em; color: var(--mira-primary); margin-left: 1px; }
 /* Eyebrow: rotulo de fonte em caixa alta (plano de ajuste visual, secao 3) */
 .cb-eyebrow {
     font-family: var(--mira-font-body); font-weight: 700;
-    font-size: clamp(16px, 1.46vw, 28px);
+    font-size: clamp(16px, calc(1.46 * var(--cb-u)), 28px);
     letter-spacing: .12em; text-transform: uppercase;
     line-height: 1.2; color: var(--mira-primary);
 }
@@ -143,3 +155,134 @@ body > section.cb-wine { background: var(--cb-wine); }
 }
 .cb-card-wine .cb-underline { text-decoration-color: var(--cb-gold-soft); }
 .cb-card-wine .cb-ref, .cb-card-wine .text-soft { color: var(--mira-text-soft); }
+
+/* ============================================================
+   Componentes de argumento (vindos do vídeo C1, 261123-jesus-deuterocanonicos)
+   Par de citações, tabela, barras, linha do tempo, passos numerados, uncial. Regras: .claude/skills/_shared/espacamento-ui.md
+   ============================================================ */
+.cb-ribbon-box { display:inline-block; padding: var(--cb-s3) var(--cb-s5); }
+.cb-gr { font-family: var(--mira-font-display); font-size: clamp(19px, calc(1.875 * var(--cb-u)), 36px); line-height: 1.35; color: var(--mira-text); }
+.cb-pt { font-family: var(--mira-font-body); font-size: clamp(19px, calc(1.875 * var(--cb-u)), 36px); line-height: 1.35; color: var(--mira-text-soft); }
+.cb-u { text-decoration: underline; text-decoration-color: var(--mira-primary); text-decoration-thickness: 3px; text-underline-offset: 6px; color: var(--mira-text); }
+.cb-pt .cb-u { color: var(--mira-text); }
+.cb-pair { display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: var(--cb-s4); align-items: stretch; text-align:left; }
+.cb-pair .glass-card { display:flex; flex-direction:column; gap: var(--cb-s2); }
+.cb-band { display:flex; align-items:center; gap: var(--cb-s4); margin-top: var(--cb-s4); text-align:left; }
+.cb-pct { font-family: var(--mira-font-display); font-weight:600; color: var(--mira-primary); font-size: clamp(48px, calc(5.4 * var(--cb-u)), 104px); line-height:1; flex:0 0 auto; display:inline-block; }
+.cb-band-txt { display:flex; flex-direction:column; gap: var(--cb-s1); }
+.cb-count { font-family: var(--mira-font-body); font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size: clamp(14px,calc(1.25 * var(--cb-u)),24px); color: var(--mira-text-soft); }
+
+/* Tabela */
+table.cb-table { width:100%; border-collapse: separate; border-spacing: 0 var(--cb-s1); text-align:left; }
+.cb-table th { font-family: var(--mira-font-body); font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size: clamp(13px,calc(1.2 * var(--cb-u)),23px); color: var(--mira-primary); padding: 0 var(--cb-s2) var(--cb-s1); }
+.cb-table td { background: var(--mira-crop); font-size: clamp(17px,calc(1.6 * var(--cb-u)),31px); line-height:1.25; padding: var(--cb-s2) var(--cb-s2); color: var(--mira-text); }
+.cb-table td:first-child { border-left: 3px solid var(--mira-primary); }
+.cb-table td.cb-num { font-family: var(--mira-font-display); font-weight:600; color: var(--mira-primary); font-size: clamp(22px,calc(2.1 * var(--cb-u)),40px); text-align:right; white-space:nowrap; }
+.cb-table td.cb-soft { color: var(--mira-text-soft); }
+.cb-table td .cb-gr-sm { font-family: var(--mira-font-display); }
+
+.cb-compact td { padding: var(--cb-s1) var(--cb-s2); font-size: clamp(16px,calc(1.5 * var(--cb-u)),29px); }
+.cb-compact td.cb-num { font-size: clamp(19px,calc(1.8 * var(--cb-u)),34px); }
+.cb-table { margin-inline:auto; }
+/* Barras de paridade */
+.cb-bars { display:flex; flex-direction:column; gap: var(--cb-s2); position:relative; text-align:left; }
+.cb-bar-row { display:grid; grid-template-columns: minmax(0, 15em) minmax(0,1fr); align-items:center; gap: var(--cb-s3); font-size: clamp(16px,calc(1.5 * var(--cb-u)),29px); }
+.cb-bar-label { color: var(--mira-text); white-space:nowrap; }
+.cb-bar-label small { color: var(--mira-text-soft); font-size: .85em; }
+.cb-bar-track { position:relative; height: clamp(26px, calc(2.5 * var(--cb-u)), 48px); background: var(--mira-crop); }
+.cb-bar-fill { position:absolute; left:0; top:0; bottom:0; width:0; background: var(--mira-primary); transition: width 1400ms cubic-bezier(.2,.7,.2,1); overflow:hidden; }
+.cb-on .cb-bar-fill { width: var(--v); }
+.cb-bar-fill b { position:absolute; right: .45em; top:50%; transform: translateY(-50%); font-family: var(--mira-font-display); font-weight:600; color: var(--mira-bg); font-size: 1.05em; }
+.cb-bar-fill::after { content:''; position:absolute; inset:0; background: linear-gradient(100deg, transparent 40%, rgba(243,235,220,.28) 50%, transparent 60%); background-size: 200% 100%; animation: cb-shimmer 12s linear infinite; }
+.cb-ruler { position:absolute; top: -1.2em; bottom: -.6em; border-left: 3px dashed var(--mira-text-soft); pointer-events:none; }
+.cb-ruler span { position:absolute; top:-1.6em; font-style:normal; left:.5em; white-space:nowrap; font-family: var(--mira-font-body); font-weight:700; font-size: clamp(13px,calc(1.2 * var(--cb-u)),23px); color: var(--mira-text-soft); letter-spacing:.06em; }
+
+/* Uncial (transcrição de códice) */
+.cb-uncial { font-family: var(--mira-font-display); font-weight:600; letter-spacing: .14em; text-transform: uppercase; color: var(--mira-text); }
+.cb-uncial-xl { font-size: clamp(34px, calc(3.9 * var(--cb-u)), 76px); line-height:1.15; }
+.cb-uncial-md { font-size: clamp(17px, calc(1.6 * var(--cb-u)), 31px); line-height:1.3; letter-spacing:.08em; }
+
+/* Linha do tempo curta (concílios) */
+.cb-tl { display:flex; justify-content:space-between; align-items:flex-start; position:relative; margin: var(--cb-s5) auto var(--cb-s4); width: min(1500px, 88vw); }
+.cb-tl::before { content:''; position:absolute; left:0; right:0; top: .62em; height:3px; background: var(--mira-primary); opacity:.6; font-size: clamp(30px,calc(3.33 * var(--cb-u)),64px); }
+.cb-tl-item { position:relative; text-align:center; flex:1 1 0; }
+.cb-tl-dot { display:block; width:16px; height:16px; border-radius:50%; background: var(--mira-primary); margin: calc(clamp(30px,calc(3.33 * var(--cb-u)),64px) * .62 - 8px) auto var(--cb-s2); box-shadow: 0 0 0 5px var(--mira-glow-soft); }
+.cb-tl-yr { font-family: var(--mira-font-display); font-weight:600; color: var(--mira-primary); font-size: clamp(30px,calc(3.33 * var(--cb-u)),64px); line-height:1; display:block; margin-bottom: var(--cb-s1); }
+.cb-tl-ev { font-size: clamp(17px,calc(1.6 * var(--cb-u)),31px); color: var(--mira-text); }
+
+/* Cartões de 2 ou 3 */
+.cb-cards { display:flex; gap: var(--cb-s3); align-items:stretch; text-align:left; }
+.cb-cards .glass-card { flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap: var(--cb-s2); }
+
+/* Movimento lento (identidade, seção 4): a citação fica parada; o movimento vive no número,
+   na barra, na moldura e na imagem de fundo. */
+@keyframes cb-kenburns { 0% { transform: scale(1); } 100% { transform: scale(1.03); } }
+.cb-bgart { position:absolute; inset:0; background-size:cover; background-position:center; animation: cb-kenburns 14s ease-in-out infinite alternate; }
+@keyframes cb-corner-glow { 0%,100% { opacity: .75; } 50% { opacity: 1; } }
+.cb-corner { animation: cb-corner-glow 12s ease-in-out infinite; }
+.cb-pct.cb-halo { animation: cb-breathe 10s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .cb-bgart, .cb-corner, .cb-halo, .cb-bar-fill::after { animation: none !important; } }
+
+/* ============================================================
+   Revisão de espaçamento e do grego (24/11/2026)
+   ============================================================ */
+/* Unidade fluida: o menor entre largura e altura, para janela baixa não estourar o slide */
+
+/* Grego em Gentium: o EB Garamond desenha Υ, Ξ e as ligaduras em forma cursiva, difícil de ler */
+.cb-gr, .cb-greek, .cb-uncial, .cb-table td .cb-gr-sm { font-family: var(--cb-font-greek); }
+.cb-gr { line-height: 1.45; }
+.cb-uncial { font-weight: 700; letter-spacing: .06em; text-transform: none; }
+.cb-uncial-md { letter-spacing: .03em; line-height: 1.35; }
+.cb-u { text-underline-offset: .24em; }
+
+/* Ritmo vertical: título, bloco e conclusão separados pelo mesmo passo */
+section[data-slide] h2.cb-text-title { margin-bottom: var(--cb-s4); }
+section[data-slide]:not(:has(.cb-footnotes)) .cb-fn-space { padding-bottom: 0; }
+.text-center .cb-text-corpo, .cb-ribbon-box p { text-wrap: balance; }
+.cb-footnotes { max-width: min(1300px, 70vw); }
+
+/* Passos numerados: número ao lado do texto */
+.cb-line { display: grid; grid-template-columns: 1.6em minmax(0,1fr); font-size: clamp(40px, calc(4.2 * var(--cb-u)), 80px); align-items: center; }
+.cb-line > p { font-size: clamp(22px, calc(2.1 * var(--cb-u)), 40px); line-height: 1.4; }
+
+/* Cartões */
+.cb-pair .glass-card, .cb-cards .glass-card { padding: var(--cb-s4); gap: var(--cb-s3); }
+.cb-pair .cb-pt { padding-top: var(--cb-s3); border-top: 1px solid rgba(184,150,62,.35); }
+.cb-nv { display:block; margin-top: .35em; font-size: .8em; letter-spacing: .04em; text-transform: none; color: var(--mira-text-soft); }
+.cb-pair .glass-card > .cb-eyebrow { min-height: 1.2em; }
+.cb-pair.cb-has-nv .glass-card > .cb-eyebrow { min-height: 2.6em; }
+
+/* Tabelas */
+.cb-table th { padding: 0 var(--cb-s3) var(--cb-s1); }
+.cb-table td { padding: calc(var(--cb-s2) * .85) var(--cb-s3); }
+.cb-table.cb-compact td { padding: calc(var(--cb-s1) * 1.1) var(--cb-s3); }
+.cb-table th.cb-th-num { text-align: right; }
+.cb-table.cb-codices td { vertical-align: top; padding-block: var(--cb-s3); }
+.cb-table.cb-codices td .cb-uncial { margin: 0 0 .5em !important; }
+.cb-table.cb-narrow { width: min(1100px, 70vw); }
+
+/* Barras: o valor sai de dentro da barra e ganha coluna própria */
+.cb-bars { margin-top: calc(var(--cb-s4) + 1.2em) !important; }
+.cb-bar-row { grid-template-columns: 12.5em minmax(0,1fr) 3em; }
+.cb-bar-val { font-family: var(--mira-font-display); font-weight: 600; color: var(--mira-primary); font-size: 1.15em; text-align: right; }
+.cb-ruler { top: calc(var(--cb-s2) * -.5 - 1px); bottom: calc(var(--cb-s2) * -.5 - 1px); border-left-color: var(--mira-text); }
+.cb-ruler span { left: 0 !important; right: auto !important; transform: translateX(-50%); top: -1.7em; color: var(--mira-text); }
+
+/* Linha do tempo: a linha passa pelos pontos, o ano fica acima */
+.cb-tl { margin: var(--cb-s5) auto; }
+.cb-tl::before { font-size: clamp(30px, calc(3.33 * var(--cb-u)), 64px); top: calc(1em + var(--cb-s3) + 6.5px); }
+.cb-tl-yr { margin-bottom: var(--cb-s3); }
+.cb-tl-dot { margin: 0 auto var(--cb-s3); position: relative; }
+
+/* Acabamento */
+section[data-slide] h2.cb-text-title:has(+ .cb-bars), section[data-slide] h2.cb-text-title:has(+ div > .cb-line) { margin-bottom: var(--cb-s5); }
+div:has(> .cb-line) { gap: var(--cb-s5) !important; }
+.cb-line > p { max-width: none; text-wrap: pretty; }
+.cb-pair .glass-card { padding: var(--cb-s3) var(--cb-s4); gap: calc(var(--cb-s3) * .75); }
+.cb-pair .cb-pt { padding-top: calc(var(--cb-s3) * .75); }
+.cb-uncial-xl { font-size: clamp(36px, calc(4.6 * var(--cb-u)), 88px); }
+.cb-codices { table-layout: fixed; }
+.cb-codices th:first-child { width: 11%; }
+.cb-codices .cb-pt { text-wrap: balance; }
+.cb-codices .cb-uncial-md { text-wrap: balance; }
+

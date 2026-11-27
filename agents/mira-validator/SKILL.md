@@ -64,6 +64,11 @@ Execute cada verificação abaixo e registre PASS ou FAIL com detalhes.
 | D2 | Padding adequado | Cards devem usar `p-8` ou `p-10`. Buscar `p-16` em cards (não deve existir) |
 | D3 | Gap entre cards | `<main>` deve ter `gap-[60vh]` |
 | D4 | Glassmorphism | Deve existir `backdrop-filter: blur(10px)` no CSS |
+| D5 | Medida fluida | Buscar `clamp(...vw...)` em fonte, margem, gap ou padding. Tem que ser `calc(N * var(--cb-u))` (ou a unidade `min(1vw, 1.778vh)` do tema). Regra: `agents/_shared/espacamento-ui.md`, seção 1 |
+| D6 | Escala de espaço | Margem, gap e padding de slide só com `--cb-s1` a `--cb-s5`. `px` solto é aviso |
+| D7 | Componentes | Par de citações, tabela, barras, linha do tempo e passos numerados seguem a seção 3 de `espacamento-ui.md` |
+| D8 | Estouro | Abrir em 1920×1080, 1440×789 e 1200×553 e medir `scrollHeight > clientHeight` em cada `section`. Relatar slide e pixels |
+| D9 | Grego | Texto grego em `var(--cb-font-greek)` (Gentium Plus), Σ impresso nas transcrições, sem `text-transform: uppercase` no grego |
 
 ### E. Tipografia (importante)
 
